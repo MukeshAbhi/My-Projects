@@ -99,7 +99,7 @@ describe("User metadata data endpoints", () => {
             "name": "Timmy"
         }) 
 
-        avatarId = avataResponse.body.avatarId
+        avatarId = avataResponse.body.id
     })
 
     test("User cant update their metadata", async () => {
@@ -150,9 +150,9 @@ describe("User avatar information", () => {
         const avataResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/avatar`).send({
             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
             "name": "Timmy"
-        }) 
+        }).set({"authorization" : `Bearer ${token}`})
 
-        avatarId = avataResponse.body.avatarId
+        avatarId = avataResponse.body.id;
     })
 
     test("Get back avatar information for a user", async () => {
@@ -161,7 +161,7 @@ describe("User avatar information", () => {
         });
 
         expect(response.body.avatars.length).toBe(1);
-        expect(response.body.avatars[0].userId).toBe(userId);
+        expect(response.body.avatars[0].id).toBe(userId);
     });
 
     test("Available avatars lists the reacently created avatars", async () => {
@@ -199,7 +199,7 @@ describe("Space information", () => {
             type: "admin"
         });
 
-        adminId = signupResponse.body.userId;
+        adminId = signupResponse.body.id;
 
         const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
             username,
@@ -207,7 +207,7 @@ describe("Space information", () => {
         })
         adminToken = response.body.token;
 
-        const element1 = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+        const element1Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
             "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
             "width": 1,
             "height": 1,
@@ -216,7 +216,7 @@ describe("Space information", () => {
             "authorization" : `Bearer ${adminToken}`
         });
 
-        const element2 = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+        const element2Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
             "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
             "width": 1,
             "height": 1,
@@ -225,15 +225,15 @@ describe("Space information", () => {
             "authorization" : `Bearer ${adminToken}`
         });
 
-        element1Id = element1.body.elementId;
-        element2Id = element2.body.elementId;
+        element1Id = element1Response.body.id;
+        element2Id = element2Response.body.id;
 
-        const map = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
+        const mapResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
             "thumbnail": "https://thumbnail.com/a.png",
             "dimensions": "100x200",
             "name": "100 person interview room",
             "defaultElements": [{
-                    elementId: element1,
+                    elementId: element1Id,
                     x: 20,
                     y: 20
                 }, {
@@ -253,7 +253,7 @@ describe("Space information", () => {
          }).set({
             "authorization" : `Bearer ${adminToken}`
         });
-        mapId = map.body.mapId;
+        mapId = mapResponse.body.id;
 
         const userSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
             username: `${username}-user`,
@@ -261,7 +261,7 @@ describe("Space information", () => {
             type: "user"
         });
 
-        userId = userSignupResponse.body.userId;
+        userId = userSignupResponse.body.id;
 
         const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
             username: `${username}-user`,
@@ -281,7 +281,7 @@ describe("Space information", () => {
             "mapId": mapId
        }).set({"authorization" : `Bearer ${userToken}`});
 
-       expect(response.body.spaceId).toBeDefined();
+       expect(response.body.id).toBeDefined();
     });
 
     test("User is able to create a space without mapId(empty space)", async () => {
@@ -289,7 +289,7 @@ describe("Space information", () => {
             "name" : "Test",
             "dimensions" : "100x200"
         }).set({"authorization" : `Bearer ${userToken}`});
-        expect(response.body.spaceId).toBeDefined();
+        expect(response.body.id).toBeDefined();
     })
 
     test("User is NOT able to create a space without mapId(empty space) AND dimensions", async () => {
@@ -365,7 +365,7 @@ describe("Arena endPoins", () => {
                 type: "admin"
             });
     
-            adminId = signupResponse.body.userId;
+            adminId = signupResponse.body.id;
     
             const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
                 username,
@@ -373,7 +373,7 @@ describe("Arena endPoins", () => {
             })
             adminToken = response.body.token;
     
-            const element1 = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            const element1Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
                 "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
                 "width": 1,
                 "height": 1,
@@ -382,7 +382,7 @@ describe("Arena endPoins", () => {
                 "authorization" : `Bearer ${adminToken}`
             });
     
-            const element2 = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            const element2Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
                 "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
                 "width": 1,
                 "height": 1,
@@ -391,15 +391,15 @@ describe("Arena endPoins", () => {
                 "authorization" : `Bearer ${adminToken}`
             });
     
-            element1Id = element1.body.elementId;
-            element2Id = element2.body.elementId;
+            element1Id = element1Response.body.id;
+            element2Id = element2Response.body.id;
     
-            const map = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
+            const mapResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
                 "thumbnail": "https://thumbnail.com/a.png",
                 "dimensions": "100x200",
                 "name": "100 person interview room",
                 "defaultElements": [{
-                        elementId: element1,
+                        elementId: element1Id,
                         x: 20,
                         y: 20
                     }, {
@@ -419,7 +419,7 @@ describe("Arena endPoins", () => {
              }).set({
                 "authorization" : `Bearer ${adminToken}`
             });
-            mapId = map.body.mapId;
+            mapId = mapResponse.body.id;
     
             const userSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
                 username: `${username}-user`,
@@ -427,7 +427,7 @@ describe("Arena endPoins", () => {
                 type: "user"
             });
     
-            userId = userSignupResponse.body.userId;
+            userId = userSignupResponse.body.id;
     
             const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
                 username: `${username}-user`,
@@ -436,13 +436,13 @@ describe("Arena endPoins", () => {
     
             userToken = userSignInResponse.body.token;
 
-            const space = await request(app).post(`${BACKEND_URL}/api/v1/space`).send({
+            const spaceResponse = await request(app).post(`${BACKEND_URL}/api/v1/space`).send({
                 "name" : "Test",
                 "dimensions" : "100x200",
                 "mapId" : "map1"
             }).set({"authorization": `Bearer ${userToken}`});
 
-            spaceId = space.body.spaceId;
+            spaceId = spaceResponse.body.id;
     
         })
 
@@ -493,4 +493,128 @@ describe("Arena endPoins", () => {
 
             expect(response.statusCode).toBe(400)
         })
+})
+
+describe("Admin endPoints", () => {
+    let adminToken = "";
+    let adminId = "";
+    let userId = "";
+    let userToken = "";
+        
+    beforeAll(async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = '123456';
+    
+        const signupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            password,
+            type: "admin"
+        });
+    
+        adminId = signupResponse.body.id;
+    
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            username,
+            password
+        })
+        adminToken = response.body.token;
+    
+        const userSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username: `${username}-user`,
+            password,
+            type: "user"
+        });
+    
+        userId = userSignupResponse.body.id;
+    
+        const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            username: `${username}-user`,
+            password
+        })
+    
+        userToken = userSignInResponse.body.token;
+    
+    })
+
+    test("user is not able to hit admin endpoints", async () => {
+        const elementResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+        }).set({
+            "authorization" : `Bearer ${userToken}`
+        });
+
+        const mapResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
+            "thumbnail": "https://thumbnail.com/a.png",
+            "dimensions": "100x200",
+            "name": "100 person interview room",
+            "defaultElements": []
+         }).set({
+            "authorization" : `Bearer ${userToken}`
+        });
+
+        const avatarResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${userToken}`})
+
+        const updateElementResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/element/123`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s"
+        }).set({"authorization" : `Bearer ${userToken}`})
+
+        expect(elementResponse.statusCode).toBe(403);
+        expect(mapResponse.statusCode).toBe(403);
+        expect(avatarResponse.statusCode).toBe(403);
+        expect(updateElementResponse.statusCode).toBe(403);
+    });
+
+    test("Admin able to hit admin endpoints", async () => {
+        const elementResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+        }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
+
+        const mapResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
+            "thumbnail": "https://thumbnail.com/a.png",
+            "dimensions": "100x200",
+            "name": "100 person interview room",
+            "defaultElements": []
+         }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
+
+        const avatarResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`})
+
+        expect(elementResponse.statusCode).toBe(200);
+        expect(mapResponse.statusCode).toBe(200);
+        expect(avatarResponse.statusCode).toBe(200);
+        
+    });
+
+    test("Admin is able to update element", async () => {
+        const elementResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+        }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
+
+        const updateElementResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/element/${elementResponse.body.id}`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s"
+        }).set({"authorization" : `Bearer ${adminToken}`})
+
+        expect(updateElementResponse.statusCode).toBe(200);
+
+    })
 })
