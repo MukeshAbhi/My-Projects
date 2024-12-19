@@ -3,6 +3,7 @@ import request from 'supertest';
 import { app }  from '../index';
 
 const BACKEND_URL = "http://localhost:3000"
+const WS_URL = "http://localhost:3001"
 
 describe("Authentication", () => {
     test("User is able to sign up ONLY Once", async () => {
@@ -193,19 +194,19 @@ describe("Space information", () => {
         const username = `abhi-${Math.random()}`;
         const password = '123456';
 
-        const signupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+        const adminSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
             username,
             password,
             type: "admin"
         });
 
-        adminId = signupResponse.body.id;
+        adminId = adminSignupResponse.body.userId;
 
-        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+        const adminSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
             username,
             password
         })
-        adminToken = response.body.token;
+        adminToken = adminSignInResponse.body.token;
 
         const element1Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
             "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
@@ -261,7 +262,7 @@ describe("Space information", () => {
             type: "user"
         });
 
-        userId = userSignupResponse.body.id;
+        userId = userSignupResponse.body.userId;
 
         const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
             username: `${username}-user`,
@@ -359,19 +360,19 @@ describe("Arena endPoins", () => {
             const username = `abhi-${Math.random()}`;
             const password = '123456';
     
-            const signupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            const adminSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
                 username,
                 password,
                 type: "admin"
             });
     
-            adminId = signupResponse.body.id;
+            adminId = adminSignupResponse.body.id;
     
-            const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            const adminSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
                 username,
                 password
             })
-            adminToken = response.body.token;
+            adminToken = adminSignInResponse.body.token;
     
             const element1Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
                 "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
@@ -427,7 +428,7 @@ describe("Arena endPoins", () => {
                 type: "user"
             });
     
-            userId = userSignupResponse.body.id;
+            userId = userSignupResponse.body.userId;
     
             const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
                 username: `${username}-user`,
@@ -505,19 +506,19 @@ describe("Admin endPoints", () => {
         const username = `abhi-${Math.random()}`;
         const password = '123456';
     
-        const signupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+        const adminSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
             username,
             password,
             type: "admin"
         });
     
-        adminId = signupResponse.body.id;
+        adminId = adminSignupResponse.body.userId;
     
-        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+        const adminSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
             username,
             password
         })
-        adminToken = response.body.token;
+        adminToken = adminSignInResponse.body.token;
     
         const userSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
             username: `${username}-user`,
@@ -525,7 +526,7 @@ describe("Admin endPoints", () => {
             type: "user"
         });
     
-        userId = userSignupResponse.body.id;
+        userId = userSignupResponse.body.userId;
     
         const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
             username: `${username}-user`,
@@ -618,3 +619,244 @@ describe("Admin endPoints", () => {
 
     })
 })
+
+describe("WebSockets tests", () => {
+    let mapId = "";
+    let element1Id = "";
+    let element2Id = "";
+    let adminToken = "";
+    let adminId = "";
+    let userId = "";
+    let userToken = "";
+    let spaceId = "";
+    let ws1: WebSocket;
+    let ws2: WebSocket;
+    let ws1Messages : string[] = [];
+    let ws2Messages : string[] = [];
+    let userX = "";
+    let userY = "";
+    let adminX = "";
+    let adminY = "";
+    
+    const setUpHttp = async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = '123456';
+    
+        const adminSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            password,
+            type: "admin"
+        });
+    
+        adminId = adminSignupResponse.body.id;
+    
+        const adminSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            username,
+            password
+        })
+        adminToken = adminSignInResponse.body.token;
+    
+        const element1Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+        }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
+    
+        const element2Response = await request(app).post(`${BACKEND_URL}/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+            }).set({
+                "authorization" : `Bearer ${adminToken}`
+        });
+    
+        element1Id = element1Response.body.id;
+        element2Id = element2Response.body.id;
+    
+        const mapResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/map`).send({
+            "thumbnail": "https://thumbnail.com/a.png",
+            "dimensions": "100x200",
+            "name": "100 person interview room",
+            "defaultElements": [{
+                    elementId: element1Id,
+                    x: 20,
+                    y: 20
+                }, {
+                    elementId: element2Id,
+                    x: 18,
+                    y: 20
+                }, {
+                    elementId: element1Id,
+                    x: 19,
+                    y: 20
+                    }, {
+                    elementId: element2Id,
+                    x: 19,
+                    y: 20
+                }
+            ]
+            }).set({
+                "authorization" : `Bearer ${adminToken}`
+        });
+        mapId = mapResponse.body.id;
+    
+        const userSignupResponse = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username: `${username}-user`,
+            password,
+            type: "user"
+        });
+    
+        userId = userSignupResponse.body.userId;
+    
+        const userSignInResponse = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            username: `${username}-user`,
+            password
+        })
+    
+        userToken = userSignInResponse.body.token;
+
+        const spaceResponse = await request(app).post(`${BACKEND_URL}/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200",
+            "mapId" : "map1"
+        }).set({"authorization": `Bearer ${userToken}`});
+
+        spaceId = spaceResponse.body.id;
+    }
+    
+    const setUpWs = async () => {
+        ws1 = new WebSocket(WS_URL);
+        ws2 = new WebSocket(WS_URL);
+
+        await new Promise ( r => {
+            ws1.onopen = r
+        })
+
+        await new Promise ( r => {
+            ws2.onopen = r
+        })
+
+        ws1.onmessage = (event) => {
+            ws1Messages.push(JSON.parse(event.data))
+        }
+
+        ws2.onmessage = (event) => {
+            ws2Messages.push(JSON.parse(event.data))
+        }
+
+       
+    }
+
+    function waitForAndPopulateTheLatestMessage (messageArray : string[]) {
+       return new Promise ( resolve => {
+         // Immediately resolve if the array has elements
+            if(messageArray.length > 0) {
+                resolve(messageArray.shift())
+            }else {
+                 // Poll the array every 100ms
+                const interval = setInterval(() => {
+                    if(messageArray.length > 0) {
+                        resolve(messageArray.shift())
+                        clearInterval(interval);// Stop polling once resolved
+                    }
+                },100)
+            }
+       }) 
+    }
+    beforeAll(async () => {
+        setUpHttp();
+        setUpWs();
+    })
+
+    test("Get back an acknowledgement for joining the space", async () => {
+        ws1.send(JSON.stringify({
+            "type": "join",
+            "payload": {
+                "spaceId": spaceId,
+                "token": adminToken
+            }
+        }))
+
+        ws2.send(JSON.stringify({
+            "type": "join",
+            "payload": {
+                "spaceId": spaceId,
+                "token": userToken
+            }
+        }))
+
+        const message1 : any = await waitForAndPopulateTheLatestMessage(ws1Messages);
+        const message2 : any = await waitForAndPopulateTheLatestMessage(ws2Messages);
+
+        expect(message1.type).toBe("space-joined")
+        expect(message2.type).toBe("space-joined")
+
+        // the first joined user receives an empty array and next person recevies an arry with one user i.e the previously joined user
+        expect(message1.payload.users.length + message2.payload.users.length).toBe(1); 
+
+        adminX = message1.payload.spawn.x;
+        adminY = message1.payload.spawn.y;
+
+        userX = message1.payload.spawn.x;
+        userY = message1.payload.spawn.y;
+    })
+
+    test("User should not be able to move across the boundry of the wall",async () => {
+        ws1.send(JSON.stringify({
+            type: "movement",
+            payload: {
+                x: 1000000,
+                y: 1000000
+            }
+        }));
+
+        const message : any = await waitForAndPopulateTheLatestMessage(ws1Messages);
+        expect(message.type).toBe('movement-rejected')
+        expect(message.payload.x).toBe(adminX);
+        expect(message.payload.y).toBe(adminY);
+    })
+
+    test("User should not be able to move two blocks",async () => {
+        ws1.send(JSON.stringify({
+            type: "movement",
+            payload: {
+                x: adminX + 2,
+                y: adminY + 2,
+                userId: adminId
+            }
+        }));
+
+        const message : any = await waitForAndPopulateTheLatestMessage(ws1Messages);
+        expect(message.type).toBe('movement-rejected')
+        expect(message.payload.x).toBe(adminX);
+        expect(message.payload.y).toBe(adminY);
+    })
+
+    test("Correct movement should be broadcasted to other sockets in the room",async () => {
+        ws1.send(JSON.stringify({
+            type: "movement",
+            payload: {
+                x: adminX + 1,
+                y: adminY
+            }
+        }));
+
+        const message : any = await waitForAndPopulateTheLatestMessage(ws2Messages);
+        expect(message.type).toBe('movement-rejected')
+        expect(message.payload.x).toBe(adminX + 1);
+        expect(message.payload.y).toBe(adminY);
+    })
+
+    test("If a user leaves, the others user receives a leave event",async () => {
+        ws1.close();
+
+        const message : any = await waitForAndPopulateTheLatestMessage(ws1Messages);
+        expect(message.type).toBe('user-left')
+        expect(message.payload.userId).toBe(adminId);
+    })
+    
+} )
