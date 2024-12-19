@@ -730,20 +730,19 @@ describe("WebSockets tests", () => {
     
     const setUpWs = async () => {
         ws1 = new WebSocket(WS_URL);
-        ws2 = new WebSocket(WS_URL);
-
+    
         await new Promise ( r => {
             ws1.onopen = r
         })
-
-        await new Promise ( r => {
-            ws2.onopen = r
-        })
-
         ws1.onmessage = (event) => {
             ws1Messages.push(JSON.parse(event.data))
         }
 
+        ws2 = new WebSocket(WS_URL);
+
+        await new Promise ( r => {
+            ws2.onopen = r
+        })
         ws2.onmessage = (event) => {
             ws2Messages.push(JSON.parse(event.data))
         }
@@ -751,7 +750,7 @@ describe("WebSockets tests", () => {
        
     }
 
-    function waitForAndPopulateTheLatestMessage (messageArray : string[]) {
+    const waitForAndPopulateTheLatestMessage = (messageArray : string[]) => {
        return new Promise ( resolve => {
          // Immediately resolve if the array has elements
             if(messageArray.length > 0) {
@@ -780,6 +779,7 @@ describe("WebSockets tests", () => {
                 "token": adminToken
             }
         }))
+        const message1 : any = await waitForAndPopulateTheLatestMessage(ws1Messages);
 
         ws2.send(JSON.stringify({
             "type": "join",
@@ -789,14 +789,21 @@ describe("WebSockets tests", () => {
             }
         }))
 
-        const message1 : any = await waitForAndPopulateTheLatestMessage(ws1Messages);
+        
         const message2 : any = await waitForAndPopulateTheLatestMessage(ws2Messages);
+        const message3 : any = await waitForAndPopulateTheLatestMessage(ws1Messages)
 
         expect(message1.type).toBe("space-joined")
         expect(message2.type).toBe("space-joined")
 
         // the first joined user receives an empty array and next person recevies an arry with one user i.e the previously joined user
-        expect(message1.payload.users.length + message2.payload.users.length).toBe(1); 
+        expect(message1.payload.users.length).toBe(0);
+        expect(message2.payload.users.length).toBe(1);
+        expect(message3.type).toBe("user-join");
+        expect(message3.payload.x).toBe(message2.payload.spawn.x);
+        expect(message3.payload.y).toBe(message2.payload.spawn.y);
+        expect(message3.payload.userId).toBe(userId);
+
 
         adminX = message1.payload.spawn.x;
         adminY = message1.payload.spawn.y;
@@ -858,5 +865,7 @@ describe("WebSockets tests", () => {
         expect(message.type).toBe('user-left')
         expect(message.payload.userId).toBe(adminId);
     })
+
+    
     
 } )
