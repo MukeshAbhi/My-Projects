@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeAll} from 'vitest';
 import request from 'supertest';
 import { app }  from '../index';
+import { WebSocket } from 'ws';
 
 const BACKEND_URL = "http://localhost:3000";
 const WS_URL = "http://localhost:3001";
@@ -329,9 +330,6 @@ describe("User avatar information", () => {
         expect(currentAvatar).toBeDefined();
 
     })
-
-
-
 });
 
 describe("Space information", () => {
@@ -632,7 +630,7 @@ describe("WebSockets tests", () => {
         await new Promise ( resolve => {
             ws1.onopen = resolve
         })
-        ws1.onmessage = (event) => {
+        ws1.onmessage = (event : any) => {
             ws1Messages.push(JSON.parse(event.data))
         }
 
@@ -641,7 +639,7 @@ describe("WebSockets tests", () => {
         await new Promise ( resolve => {
             ws2.onopen = resolve
         })
-        ws2.onmessage = (event) => {
+        ws2.onmessage = (event : any) => {
             ws2Messages.push(JSON.parse(event.data))
         }
 
