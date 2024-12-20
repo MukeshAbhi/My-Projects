@@ -2,8 +2,8 @@ import { describe, test, expect, beforeAll} from 'vitest';
 import request from 'supertest';
 import { app }  from '../index';
 
-const BACKEND_URL = "http://localhost:3000"
-const WS_URL = "http://localhost:3001"
+const BACKEND_URL = "http://localhost:3000";
+const WS_URL = "http://localhost:3001";
 
 const adminCreate = async () => {
     let adminId;
@@ -133,7 +133,6 @@ describe("Authentication", () => {
     });
 
     test("Signup request fails if username is empty", async () => {
-        const username = `abhi-${Math.random()}`;
         const password = '123456';
 
         const response = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
@@ -141,6 +140,29 @@ describe("Authentication", () => {
             type: "admin"
         })
         expect(response.statusCode).toBe(400);
+    });
+
+    test("Signup request fails if pssword is empty", async () => {
+        const username = `abhi-${Math.random()}`
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            type: "admin"
+        })
+        expect(response.statusCode).toBe(400);
+    });
+
+    test("Signup request fails if password is less than 6 letters", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = '12345';
+
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            password,
+            type: "admin"
+        })
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toHaveProperty("error");
+        expect(response.body.error).toBe("Password must be at least 6 characters long");
     });
 
     test("Signin succeeds if the username and password are correct ", async () => {
@@ -161,7 +183,7 @@ describe("Authentication", () => {
         expect(response.body.token).toBeDefined();
     });
 
-    test("Signin fails if the username and password is incorrect ", async () => {
+    test("Signin fails if the username  is incorrect ", async () => {
         const username = `abhi-${Math.random()}`;
         const password = "123456";
         await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
@@ -177,53 +199,92 @@ describe("Authentication", () => {
 
         expect(response.statusCode).toBe(403);
     });
+
+    test("Signin fails if the password  is incorrect ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
+
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            username ,
+            password : "wrongpassword"
+        });
+
+        expect(response.statusCode).toBe(403);
+    });
+
+    test("Signin fails if the username  empty ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
+
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            password
+        });
+
+        expect(response.statusCode).toBe(403);
+    });
+
+    test("Signin fails if the password is empty ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
+
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
+            username,
+        });
+
+        expect(response.statusCode).toBe(403);
+    });
+
     // add more auth tests for robust backend
 });
 
 describe("User metadata data endpoints", () => {
-
-    let token = '';
+    let adminToken = '';
+    let userToken = '';
     let avatarId = '';
 
     beforeAll(async () => {
-        const username = `abhi-${Math.random()}`;
-        const password = '123456';
 
-        await request(app).post(`${BACKEND_URL}/api/v1/signup`).send({
-            username,
-            password,
-            type: "admin"
-        });
-
-        const response = await request(app).post(`${BACKEND_URL}/api/v1/signin`).send({
-            username,
-            password
-        })
-        token = response.body.token;
+        ({adminToken} = await adminCreate());
+        ({userToken} = await userCreate());
 
         const avataResponse = await request(app).post(`${BACKEND_URL}/api/v1/admin/avatar`).send({
             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
             "name": "Timmy"
-        }) 
+        }).set({"authorization" : `Bearer ${adminToken}`});
 
         avatarId = avataResponse.body.id
     })
 
-    test("User cant update their metadata", async () => {
+    test("User cant update their metadata with an invalid avatar ID", async () => {
         const response = await request(app).post(`${BACKEND_URL}/api/v1/user/metadata`).send({
-            avatarId : "123456789789"
-        }).set({"authorization": `Bearer ${token}`})
+            avatarId : "123456789789" // Invalid Id
+        }).set({"authorization": `Bearer ${userToken}`})
         expect(response.statusCode).toBe(400);
     })
 
-    test("User can update their metadata", async () => {
+    test("User can update their metadata with a valid avatar ID", async () => {
         const response = await request(app).post(`${BACKEND_URL}/api/v1/user/metadata`).send({
             avatarId 
-        }).set({"authorization": `Bearer ${token}`})
+        }).set({"authorization": `Bearer ${userToken}`})
         expect(response.statusCode).toBe(200);
     })
     
-    test("User fis not ablr to update there meta data if not provide auth header", async () => {
+    test("User is not able to update there meta data if not provide auth header", async () => {
         const response = await request(app).post(`${BACKEND_URL}/api/v1/user/metadata`).send({
             avatarId
         });
@@ -276,17 +337,15 @@ describe("User avatar information", () => {
 describe("Space information", () => {
     let mapId = "";
     let adminToken = "";
-    let adminId = "";
-    let userId = "";
     let userToken = "";
 
     beforeAll(async () => {
         
-        ({adminId,adminToken} = await adminCreate());
+        ({adminToken} = await adminCreate());
 
         ({mapId} = await mapAndElementsCreate(adminToken));
 
-        ({userId,userToken} = await userCreate());
+        ({userToken} = await userCreate());
 
     })
 
@@ -316,7 +375,8 @@ describe("Space information", () => {
     })
 
     test("User is NOT able to delete a space that does not exisst", async () => {
-        const response = await request(app).delete(`${BACKEND_URL}/api/v1/space/randomeSpaceId`).set({"authorization" : `Bearer ${userToken}`});
+        const response = await request(app).delete(`${BACKEND_URL}/api/v1/space/randomeSpaceId`)
+            .set({"authorization" : `Bearer ${userToken}`});
         expect(response.statusCode).toBe(400);
     })
 
@@ -326,7 +386,8 @@ describe("Space information", () => {
             "dimensions" : "100x200"
         }).set({"authorization" : `Bearer ${userToken}`});
 
-        const deleteResponse = await request(app).delete(`${BACKEND_URL}/api/v1/space/${response.body.spaceId}`).set({"authorization" : `Bearer ${userToken}`});
+        const deleteResponse = await request(app).delete(`${BACKEND_URL}/api/v1/space/${response.body.spaceId}`)
+            .set({"authorization" : `Bearer ${userToken}`});
 
         expect(deleteResponse.statusCode).toBe(200);
     })
@@ -337,7 +398,8 @@ describe("Space information", () => {
             "dimensions" : "100x200"
         }).set({"authorization" : `Bearer ${userToken}`});
 
-        const deleteResponse = await request(app).delete(`${BACKEND_URL}/api/v1/space/${response.body.spaceId}`).set({"authorization" : `Bearer ${adminToken}`});
+        const deleteResponse = await request(app).delete(`${BACKEND_URL}/api/v1/space/${response.body.spaceId}`)
+            .set({"authorization" : `Bearer ${adminToken}`});
 
         expect(deleteResponse.statusCode).toBe(400);
     })
@@ -354,7 +416,7 @@ describe("Space information", () => {
         }).set({"authorization" : `Bearer ${adminToken}`});
 
         const response = await request(app).get(`${BACKEND_URL}/api/v1/space/all`).set({"authorization" : `Bearer ${adminToken}`});
-        const filteredSpace = response.body.spaces.find((x:{x: String,id: String}) => x.id == spaceCreatedResponse.body.spaceId );
+        const filteredSpace = response.body.spaces.find((x: any) => x.id == spaceCreatedResponse.body.spaceId );
         expect(response.body.spaces.length).toBe(1);
         expect(filteredSpace).toBeDefined();
     })
@@ -362,80 +424,77 @@ describe("Space information", () => {
 })
 
 describe("Arena endPoins", () => {
-        let mapId = "";
-        let element1Id = "";
-        let element2Id = "";
-        let adminToken = "";
-        let adminId = "";
-        let userId = "";
-        let userToken = "";
-        let spaceId = "";
+    let mapId = "";
+    let element1Id = "";
+    let adminToken = "";
+    let userToken = "";
+    let spaceId = "";
     
-        beforeAll(async () => {
-            ({adminId,adminToken} = await adminCreate());
+    beforeAll(async () => {
+        ({adminToken} = await adminCreate());
 
-            ({mapId,element1Id} = await mapAndElementsCreate(adminToken));
+        ({mapId,element1Id} = await mapAndElementsCreate(adminToken));
 
-            ({userId,userToken} = await userCreate());
+        ({userToken} = await userCreate());
 
 
-            const spaceResponse = await request(app).post(`${BACKEND_URL}/api/v1/space`).send({
-                "name" : "Test",
-                "dimensions" : "100x200",
-                "mapId" : mapId
-            }).set({"authorization": `Bearer ${userToken}`});
+        const spaceResponse = await request(app).post(`${BACKEND_URL}/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200",
+            "mapId" : mapId
+        }).set({"authorization": `Bearer ${userToken}`});
 
-            spaceId = spaceResponse.body.id;
+        spaceId = spaceResponse.body.id;
     
+    })
+
+    test("Incorrect space Id return a 400", async () => {
+        const response = await request(app).get(`${BACKEND_URL}/api/v1/space/123dmskkds22`).set({"authorization": `Bearer ${userToken}`});
+        expect(response.statusCode).toBe(400);
+    })
+
+    test("correct sopaceId returns all elements", async () => {
+        const response = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+        expect(response.body.dimensions).toBe("100x200");
+        expect(response.body.elements.length).toBe(4);
+    })
+
+    test("Delete an element ", async () => {
+        const response = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+
+        await request(app).delete(`${BACKEND_URL}/api/v1/space/element`).send({
+            spaceId: spaceId,
+            elementId : response.body.elements[0].id
         })
 
-        test("Incorrect space Id return a 400", async () => {
-            const response = await request(app).get(`${BACKEND_URL}/api/v1/space/123dmskkds22`).set({"authorization": `Bearer ${userToken}`});
-            expect(response.statusCode).toBe(400);
-        })
+        const newResponse = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
 
-        test("correct sopaceId returns all elements", async () => {
-            const response = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
-            expect(response.body.dimensions).toBe("100x200");
-            expect(response.body.elements.length).toBe(4);
-        })
+        expect(newResponse.body.elements.length).toBe(3);
+    })
 
-        test("Delete an element ", async () => {
-            const response = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+    test("Addind an element works as expected", async () => {
+        await request(app).post(`${BACKEND_URL}/api/v1/space/element`).send({
+            "elementId" : element1Id,
+            "spaceId" : spaceId,
+            "x" : 50,
+            "y" : 20
+        }).set({"authorization": `Bearer ${userToken}`});
 
-            await request(app).delete(`${BACKEND_URL}/api/v1/space/element`).send({
-                spaceId: spaceId,
-                elementId : response.body.elements[0].id
-            })
+        const newResponse = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
 
-            const newResponse = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+        expect(newResponse.body.elements.length).toBe(4);
+    })
 
-            expect(newResponse.body.elements.length).toBe(3);
-        })
-
-        test("Addind an element works as expected", async () => {
-            await request(app).post(`${BACKEND_URL}/api/v1/space/element`).send({
-                "elementId" : element1Id,
-                "spaceId" : spaceId,
-                "x" : 50,
-                "y" : 20
-            }).set({"authorization": `Bearer ${userToken}`});
-
-            const newResponse = await request(app).get(`${BACKEND_URL}/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
-
-            expect(newResponse.body.elements.length).toBe(4);
-        })
-
-        test("Addind an element fails if element lies outside the dimensions", async () => {
-            const response = await request(app).post(`${BACKEND_URL}/api/v1/space/element`).send({
+    test("Addind an element fails if element lies outside the dimensions", async () => {
+        const response = await request(app).post(`${BACKEND_URL}/api/v1/space/element`).send({
                 "elementId" : element1Id,
                 "spaceId" : spaceId,
                 "x" : 3000,
                 "y" : 2000
-            }).set({"authorization": `Bearer ${userToken}`});
+        }).set({"authorization": `Bearer ${userToken}`});
 
-            expect(response.statusCode).toBe(400)
-        })
+        expect(response.statusCode).toBe(400)
+    })
 })
 
 describe("Admin endPoints", () => {
@@ -535,8 +594,6 @@ describe("Admin endPoints", () => {
 
 describe("WebSockets tests", () => {
     let mapId = "";
-    let element1Id = "";
-    let element2Id = "";
     let adminToken = "";
     let adminId = "";
     let userId = "";
@@ -556,7 +613,7 @@ describe("WebSockets tests", () => {
 
         ({adminId,adminToken} = await adminCreate());
 
-        ({mapId,element1Id} = await mapAndElementsCreate(adminToken));
+        ({mapId} = await mapAndElementsCreate(adminToken));
 
         ({userId,userToken} = await userCreate());
 
@@ -572,8 +629,8 @@ describe("WebSockets tests", () => {
     const setUpWs = async () => {
         ws1 = new WebSocket(WS_URL);
     
-        await new Promise ( r => {
-            ws1.onopen = r
+        await new Promise ( resolve => {
+            ws1.onopen = resolve
         })
         ws1.onmessage = (event) => {
             ws1Messages.push(JSON.parse(event.data))
@@ -581,8 +638,8 @@ describe("WebSockets tests", () => {
 
         ws2 = new WebSocket(WS_URL);
 
-        await new Promise ( r => {
-            ws2.onopen = r
+        await new Promise ( resolve => {
+            ws2.onopen = resolve
         })
         ws2.onmessage = (event) => {
             ws2Messages.push(JSON.parse(event.data))
@@ -607,9 +664,10 @@ describe("WebSockets tests", () => {
             }
        }) 
     }
+
     beforeAll(async () => {
-        setUpHttp();
-        setUpWs();
+        await setUpHttp();
+        await setUpWs();
     })
 
     test("Get back an acknowledgement for joining the space", async () => {
@@ -706,7 +764,4 @@ describe("WebSockets tests", () => {
         expect(message.type).toBe('user-left')
         expect(message.payload.userId).toBe(adminId);
     })
-
-    
-    
-} )
+})
