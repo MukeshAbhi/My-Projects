@@ -18,7 +18,8 @@
     "supertest": "^7.0.0",
     "typescript": "^5.7.2",
     "ws": "^8.18.0",
-    "@repo/db": "*"
+    "@repo/db": "*",
+    "@repo/my-types": "*"
   },
   "devDependencies": {
     "vitest": "^2.1.8"
