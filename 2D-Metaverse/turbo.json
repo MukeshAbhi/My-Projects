@@ -15,8 +15,7 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true,
-      "env": ["JWT_SECRET"]
+      "persistent": true
     }
   }
 }

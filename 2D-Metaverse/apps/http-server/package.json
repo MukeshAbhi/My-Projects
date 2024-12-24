@@ -13,7 +13,6 @@
   "description": "",
   "dependencies": {
     "@repo/db": "*",
-    "@repo/my-types": "*",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
