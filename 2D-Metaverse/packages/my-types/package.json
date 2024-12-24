@@ -1,0 +1,19 @@
+{
+  "name": "@repo/my-types",
+  "version": "1.0.0",
+  "main": "index.js",
+  "exports": {
+    "./nodeTypes" : "./src/nodeTypes.ts",
+    "./reactTypes": "./src/reactTypes.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "zod": "^3.24.1"
+  }
+}
