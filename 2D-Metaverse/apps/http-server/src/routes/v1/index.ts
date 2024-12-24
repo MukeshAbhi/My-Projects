@@ -6,15 +6,10 @@ import { signupSchema } from "@repo/my-types/types";
 import client from "@repo/db/client";
 import bcrypt from "bcrypt";
 import {sign} from "jsonwebtoken";
-import dotenv from 'dotenv'
-
 
 export const router = Router();
-dotenv.config();
-console.log(process.env.JWT_SECRET);
 
-const JWT_SECRET : string = process.env.JWT_SECRET || '';
-
+const JWT_SECRET = "DSVDSK";
 router.post("/signup", async (req,res) => {
     const parsedData = signupSchema.safeParse(req.body);
     if (!parsedData.success) {
