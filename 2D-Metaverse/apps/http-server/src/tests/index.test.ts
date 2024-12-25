@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeAll} from 'vitest';
 import request from 'supertest';
-import { app } from '../index';
+import { app } from '../index.js';
 import { WebSocket } from 'ws';
 
 const BACKEND_URL = "http://localhost:3000";

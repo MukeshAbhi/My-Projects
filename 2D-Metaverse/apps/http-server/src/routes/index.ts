@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { userRouter } from "./user";
-import { spaceRouter } from "./space";
-import { adminRouter } from "./admin";
-import { signupSchema } from "@repo/my-types/nodeTypes"
+import { userRouter } from "./user.js";
+import { spaceRouter } from "./space.js";
+import { adminRouter } from "./admin.js";
+import { signupSchema, signinSchema } from "@repo/my-types/nodeTypes"
 import client from "@repo/db/client";
 import bcrypt from "bcrypt";
 import {sign} from "jsonwebtoken";
@@ -38,7 +38,7 @@ router.post("/signup", async (req,res) => {
 } )
 
 router.post("/signin", async (req,res) => {
-    const parsedData = signupSchema.safeParse(req.body);
+    const parsedData = signinSchema.safeParse(req.body);
     if (!parsedData.success) {
         res.status(403).json({message: "Invalid Inputs/validation Failed"})
         return;
@@ -68,11 +68,10 @@ router.post("/signin", async (req,res) => {
         })
 
     }catch(e){
-
+        res.status(403).json({
+            message: "Failed to signin"
+        })
     }
-    res.json({
-        message : "Signin"
-    })
 })
 
 router.get("/elements", (req, res) => {
