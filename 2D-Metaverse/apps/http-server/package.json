@@ -4,8 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "clean": "rm -rf dist",
-    "build": "npm run clean && tsc"
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "dev": "npm run build && node dist/index.js"
   },
   "keywords": [],
   "author": "",
