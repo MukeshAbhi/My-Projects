@@ -6,36 +6,52 @@ import { signupSchema, signinSchema } from "@repo/my-types/nodeTypes"
 import client from "@repo/db/client";
 import bcrypt from "bcrypt";
 import {sign} from "jsonwebtoken";
+import { JWT_SECRET } from "../config.js";
 
 export const router = Router();
 
-const JWT_SECRET = "DSVDSK";
+
+
 router.post("/signup", async (req,res) => {
     const parsedData = signupSchema.safeParse(req.body);
     if (!parsedData.success) {
-        res.status(400).json({message: "Invalid Inputs"})
-        return 
+        //console.log("Validation failed:", parsedData.error);
+        res.status(400).json({message: "Invalid Inputs"});
+        return ;
     }
 
     const hashedPassword = await bcrypt.hash(parsedData.data.password, 10)
 
     try {
+
+        const existingUser = await client.user.findUnique({
+            where:{
+                username: parsedData.data.username
+            }
+        })
+    
+        if(existingUser){
+           // console.log("User already exists:", existingUser);
+            res.status(400).json({message: "User already exists"});
+            return;
+        }
+
        const user = await client.user.create({
             data: {
                 username: parsedData.data.username,
                 password: hashedPassword,
                 role: parsedData.data.type === "admin" ? "Admin" : "User"
-
             }
         })
 
-        res.json({
+        res.status(200).json({
             userId: user.id
         })
     } catch(e) {
-        res.status(400).json({message: "User already exists"})
+        console.error("Error creating user:", e);
+        res.status(500).json({ message: "Internal Server Error" });
     }
-} )
+});
 
 router.post("/signin", async (req,res) => {
     const parsedData = signinSchema.safeParse(req.body);
@@ -59,11 +75,9 @@ router.post("/signin", async (req,res) => {
             res.status(403).json({message: "Incorrect Password"})
             return
         }
-        const token = sign({
-            userId: user.id,
-            role: user.role
-        },JWT_SECRET);
-        res.json({
+        const token = sign({userId: user.id, role: user.role},JWT_SECRET);
+
+        res.status(200).json({
             token
         })
 

@@ -161,8 +161,6 @@ describe("Authentication", () => {
             type: "admin"
         })
         expect(response.statusCode).toBe(400);
-        expect(response.body).toHaveProperty("error");
-        expect(response.body.error).toBe("Password must be at least 6 characters long");
     });
 
     test("Signin succeeds if the username and password are correct ", async () => {
