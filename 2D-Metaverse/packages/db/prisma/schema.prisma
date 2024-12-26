@@ -58,7 +58,7 @@ model Map {
   width  Int
   height Int
   name   String
-  mapHasMultiple mapElements[]
+  mapHasMultipleElements mapElements[]
 }
 
 // Its the bridge btween Element and Map 

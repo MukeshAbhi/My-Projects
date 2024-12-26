@@ -2,7 +2,7 @@ import {verify} from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
 import { NextFunction, Request, Response } from "express";
 
-export const userMiddleware = (req: Request,res: Response ,next: NextFunction) => {
+export const userMiddleware = async (req: Request,res: Response ,next: NextFunction) => {
     const payload = req.headers.authorization;
     if (!payload) {
         res.status(403).json({messsage: "Unauthorized"});
@@ -15,12 +15,9 @@ export const userMiddleware = (req: Request,res: Response ,next: NextFunction) =
     }
 
     try{
-        const decoded = verify(token, JWT_SECRET) as {role: string, userid: string}
-        if ( decoded.role !== "User") {
-            res.status(401).json({message: "Unauthorized"});
-            return;
-        }
-        req.userId = decoded.userid;
+        const decoded = verify(token, JWT_SECRET) as {role: string, userId: string};
+        req.userId = decoded.userId;
+        next();
     }catch(e) {
         res.status(401).json({messsage: "Unauthorized"})
     }
