@@ -15,20 +15,21 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
 
     if(!parsedData.data.mapId){
         try{
-            const spaceId = await client.space.create({
+            const space = await client.space.create({
                 data: {
                     name: parsedData.data.name,
-                    width: (parsedData.data.dimensions.split("x")[0]) as unknown as number,
+                    width: (parsedData.data.dimensions.split("x")[0]) as unknown as number ,
                     height: (parsedData.data.dimensions.split("x")[1]) as unknown as number,
                     creatorId: req.userId!
                 }
             })
 
             res.json({
-                spaceId: spaceId.id
+                spaceId: space.id
             })
         }catch(e){
-            res.status(403).json({message: "Failed to create space"})
+            res.status(403).json({message: "Failed to create space"});
+            return;
         }
     }
    
@@ -37,11 +38,43 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
             where: {
                 id: parsedData.data.mapId
             },select: {
-                mapHasMultipleElements: true
+                mapHasMultipleElements: true,
+                width: true,
+                height: true
             }
         })
+
+        if(!map) {
+            res.status(400).json({message: "Map not found"})
+            return;
+        }
+
+        let space = await client.$transaction(async() => {
+            const space = await client.space.create({
+                data: {
+                    name: parsedData.data.name,
+                    width: map.width,
+                    height: map.height,
+                    creatorId: req.userId!
+                }
+            })
+
+            await client.spaceElements.createMany({
+                data:map.mapHasMultipleElements.map(e => ({
+                    spaceId: space.id,
+                    elementId: e.elementId,
+                    x: e.x,
+                    y: e.y
+                }))
+            })
+
+            return space;
+        })
+
+        res.json({spaceId : space.id})
     }catch(e){
-        res.status(403).json({message: "Failed to create space"})
+        res.status(403).json({message: "Failed to create space"});
+        return;
     }
 
 
