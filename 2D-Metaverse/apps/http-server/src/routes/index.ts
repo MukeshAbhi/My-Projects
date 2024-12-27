@@ -88,11 +88,50 @@ router.post("/signin", async (req,res) => {
     }
 })
 
-router.get("/elements", (req, res) => {
+router.get("/elements", async(req, res) => {
+    try {
+        const elements = await client.element.findMany({});
 
+        if(!elements) {
+            res.status(400).json({message: "Failed to fetch elements"});
+            return;
+        }
+
+        const response = elements.map(e => ({
+            id: e.id,
+            imageUrl: e.imageUrl,
+            width: e.width,
+            height: e.height,
+            static: e.static
+        }));
+
+        res.json({elements: response})
+    }catch(e){
+        console.log("Error fetching elements :", e)
+        res.status(500).json({message: 'Internal Server Error'})
+    }
 })
 
-router.get("/avatars", (req, res) => {
+router.get("/avatars", async (req, res) => {
+    try {
+        const avatars = await client.avatar.findMany({});
+
+        if(!avatars) {
+            res.status(400).json({message: "Failed to fetch avatars"});
+            return;
+        }
+
+        const response = avatars.map(e => ({
+            id: e.id,
+            imageUrl : e.imageUrl,
+            name: e.name
+        }))
+
+        res.json({avatars: response})
+    }catch(e){
+        console.log("Error fetching avatars :", e)
+        res.status(500).json({message: 'Internal Server Error'})
+    }
 
 })
 
