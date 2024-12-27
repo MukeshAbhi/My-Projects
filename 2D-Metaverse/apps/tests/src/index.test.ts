@@ -250,84 +250,101 @@ describe("Authentication", () => {
     // add more auth tests for robust backend
 });
 
-// describe("User metadata data endpoints", () => {
-//     let adminToken = '';
-//     let userToken = '';
-//     let avatarId = '';
+describe("User metadata data endpoints", () => {
+    let adminToken = '';
+    let userToken = '';
+    let avatarId = '';
 
-//     beforeAll(async () => {
+    beforeAll(async () => {
 
-//         ({adminToken} = await adminCreate());
-//         ({userToken} = await userCreate());
+        ({adminToken} = await adminCreate());
+        ({userToken} = await userCreate());
 
-//         const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
-//             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//             "name": "Timmy"
-//         }).set({"authorization" : `Bearer ${adminToken}`});
+        const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`});
 
-//         avatarId = avataResponse.body.id
-//     })
+        avatarId = avataResponse.body.id
+    })
 
-//     test("User cant update their metadata with an invalid avatar ID", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
-//             avatarId : "123456789789" // Invalid Id
-//         }).set({"authorization": `Bearer ${userToken}`})
-//         expect(response.statusCode).toBe(400);
-//     })
+    test("User cant update their metadata with an invalid avatar ID", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
+            avatarId : "123456789789" // Invalid Id
+        }).set({"authorization": `Bearer ${userToken}`})
+        expect(response.statusCode).toBe(400);
+    })
 
-//     test("User can update their metadata with a valid avatar ID", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
-//             avatarId 
-//         }).set({"authorization": `Bearer ${userToken}`})
-//         expect(response.statusCode).toBe(200);
-//     })
+    test("User can update their metadata with a valid avatar ID", async () => {
+        const precursor = await request(BACKEND_URL).post(`/api/v1/user/addmetadata`).send({
+            avatarId 
+        }).set({"authorization": `Bearer ${userToken}`})
+        const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
+            avatarId 
+        }).set({"authorization": `Bearer ${userToken}`})
+        expect(response.statusCode).toBe(200);
+    })
     
-//     test("User is not able to update there meta data if not provide auth header", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
-//             avatarId
-//         });
-//         expect(response.statusCode).toBe(403);
-//     })
-// });
+    test("User is not able to update there meta data if not provide auth header", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
+            avatarId
+        });
+        expect(response.statusCode).toBe(403);
+    })
+});
 
-// describe("User avatar information", () => {
-//     let userToken  = '';
-//     let avatarId = '';
-//     let userId = '';
+describe("User avatar information", () => {
+    let userToken  = '';
+    let avatarId = '';
+    let userId = '';
+    let userToken1 = '';
+    let avatarId1 = '';
+    let userId1 = '';
+    let adminToken = '';
 
-//     beforeAll(async () => {
+    beforeAll(async () => {
         
-//        ({userId, userToken } = await userCreate());
+       ({userId, userToken } = await userCreate());
+       ({adminToken} = await adminCreate());
 
-//         const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
-//             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//             "name": "Timmy"
-//         }).set({"authorization" : `Bearer ${userToken}`})
+        const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`})
 
-//         avatarId = avataResponse.body.id;
-//     })
+        avatarId = avataResponse.body.id;
 
-//     test("Get back avatar information for a user", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/user/metadata/bulk?ids=[${userId}]`).set({
-//             "authorization" :`Bearer ${userToken}`
-//         });
+        ({userId: userId1,userToken: userToken1 } = await userCreate());
 
-//         expect(response.body.avatars.length).toBe(1);
-//         expect(response.body.avatars[0].id).toBe(userId);
-//     });
+        const avataResponse1 = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`})
 
-//     test("Available avatars lists the reacently created avatars", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/avatars`).set({
-//             "authorization" :`Bearer ${userToken}`
-//         });
+        avatarId1 = avataResponse1.body.id;
+    })
 
-//         expect(response.body.avatars.length).not.toBe(0);
+    test("Get back avatar information for a user", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/user/metadata/bulk?ids=[${userId},${userId1}]`).set({
+            "authorization" :`Bearer ${userToken}`
+        });
 
-//         const currentAvatar = response.body.avatars.find((x: { id: string; }) => x.id === avatarId);
-//         expect(currentAvatar).toBeDefined();
+        expect(response.body.avatars.length).toBe(1);
+        expect(response.body.avatars[0].userId).toBe(userId1);
+    });
 
-//     })
-// });
+    test("Available avatars lists the reacently created avatars", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/avatars`).set({
+            "authorization" :`Bearer ${userToken}`
+        });
+
+        expect(response.body.avatars.length).not.toBe(0);
+
+        const currentAvatar = response.body.avatars.find((x: { id: string; }) => x.id === avatarId);
+        expect(currentAvatar).toBeDefined();
+
+    })
+});
 
 // describe("Space information", () => {
 //     let mapId = "";

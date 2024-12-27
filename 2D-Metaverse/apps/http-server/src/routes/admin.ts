@@ -99,7 +99,7 @@ adminRouter.post("/avatar", adminMiddleware, async(req, res) => {
             res.status(400).json({message: "Failed to create Avatar"})
             return;
         }
-
+        console.log("Avatarid: ",avatar.id)
         res.json({id: avatar.id});
     }catch(e){
         console.log("Error creating avatar :", e)
