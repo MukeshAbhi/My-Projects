@@ -1,5 +1,5 @@
 import { createAvatarSchema, createElementSchema, createMapSchema, updateElementSchema } from "@repo/my-types/nodeTypes";
-import { Router } from "express";
+import e, { Router } from "express";
 import { adminMiddleware } from "../middleware/admin";
 import client from "@repo/db/client";
 
@@ -28,7 +28,8 @@ adminRouter.post("/element", adminMiddleware, async (req, res) => {
         res.status(400).json({message: "Failed to create element"});
         return;
     }
-    res.json({id: element.id})
+   
+    res.json({elementId: element.id})
    }catch(e){
     console.log("Error creating element :", e)
     res.status(500).json({message: 'Internal Server Error'})
@@ -43,11 +44,14 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
         return;
     }
 
-    const id = req.params;
+    const id = req.params.elementId;
+    console.log( "ElementId : ", id)
     if(typeof id !== "string"){
         res.status(400).json({message: "Invalid inputs"});
         return;
     }
+    console.log( "ElementId : ", id)
+    
 
     try {
         const element = await client.element.findUnique({

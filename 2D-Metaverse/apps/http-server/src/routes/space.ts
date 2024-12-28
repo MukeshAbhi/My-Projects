@@ -2,11 +2,10 @@ import { addElementSchema, createSpaceSchema } from "@repo/my-types/nodeTypes";
 import { Router } from "express";
 import client from "@repo/db/client"
 import { userMiddleware } from "../middleware/user";
-import { adminMiddleware } from "../middleware/admin";
 
 export const spaceRouter = Router();
 
-// route for user to create space
+// route for user to create space - tested
 spaceRouter.post("/", userMiddleware, async (req, res) => {
     const parsedData = createSpaceSchema.safeParse(req.body);
     if (!parsedData.success) {
@@ -88,6 +87,7 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
 
 })
 
+// route to delete space - tested
 spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
     const spaceId = req.params.spaceId;
     
@@ -128,7 +128,8 @@ spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
     }
 })
 
-spaceRouter.get("all", userMiddleware, async (req , res) => {
+// route to get all spaces of the user - tested
+spaceRouter.get("/all", userMiddleware, async (req , res) => {
     try{
         const userSpaces = await client.user.findUnique({
             where:{
@@ -143,13 +144,14 @@ spaceRouter.get("all", userMiddleware, async (req , res) => {
             return;
         }
 
-        res.json({
-            spaces: userSpaces.spaces.map(s => ({
+        const spaces = userSpaces.spaces.map(s => ({
             id: s.id,
             name:s.name,
             thumbnail: s.thumbnail,
             dimensions: `${s.width}x${s.height}`,
-        }))})
+        }))
+        console.log("spaces: ", spaces)
+        res.json({spaces})
     }catch(e) {
         console.error("Error fetching spaces: ", e);
         res.status(400).json({message:"Bad request"})
@@ -157,7 +159,8 @@ spaceRouter.get("all", userMiddleware, async (req , res) => {
 
 })
 
-spaceRouter.post("/element", adminMiddleware , async (req, res) => {
+// route to add an element by user - tested
+spaceRouter.post("/element", userMiddleware , async (req, res) => {
 
     const parsedData = addElementSchema.safeParse(req.body);
     if (!parsedData.success) {
@@ -166,7 +169,7 @@ spaceRouter.post("/element", adminMiddleware , async (req, res) => {
         return ;
     }
     try{
-        const space = await client.space.findUnique({
+        const space = await client.space.findFirst({
             where: {
                 id: parsedData.data.spaceId,
                 creatorId: req.userId
@@ -186,9 +189,11 @@ spaceRouter.post("/element", adminMiddleware , async (req, res) => {
                 elementId: parsedData.data.elementId,
                 x: parsedData.data.x,
                 y: parsedData.data.y
+            },include: {
+                element: true
             }
         })
-
+        
         res.json({message: "Successfully added a element"})
     }catch(e){
         console.error("Error adding element:", e);
@@ -197,7 +202,7 @@ spaceRouter.post("/element", adminMiddleware , async (req, res) => {
     }
 })
 
-spaceRouter.delete("/element", adminMiddleware, async (req, res) => {
+spaceRouter.delete("/element", userMiddleware, async (req, res) => {
     const id = req.body.id;
     if(typeof id !== "string") {
         res.status(400).json({message: "Invaild Inputs"});
@@ -213,9 +218,10 @@ spaceRouter.delete("/element", adminMiddleware, async (req, res) => {
                 space: true
             }
         });
-
+        console.log("spaceElement : ", spaceElement?.spaceId)
+        console.log("elementId : ", id)
         // Check if the element exists and the user is authorized
-        if (!spaceElement?.space.creatorId || spaceElement.space.creatorId !== req.userId) {
+        if (!spaceElement?.space.creatorId || (spaceElement.space.creatorId !== req.userId)) {
             res.status(403).json({message: "Unauthorised"});
             return;
         };
@@ -227,13 +233,14 @@ spaceRouter.delete("/element", adminMiddleware, async (req, res) => {
             }
         })
         // Respond with a 204 status for successful deletion
-        res.status(204).send();
+        res.status(204).json({message: "Element deleted"});
     }catch(e){
         res.status(500).json({message: "Failed to delete element"});
         return;
     }
 })
 
+// route to get all elements of a space - tested
 spaceRouter.get("/:spaceId", async (req, res) => {
     const spaceId = req.params.spaceId;
     if(typeof spaceId !== "string"){
@@ -260,7 +267,7 @@ spaceRouter.get("/:spaceId", async (req, res) => {
         }
 
         const response = {
-            dimension: `${space.width}x${space.height}`,
+            "dimensions": `${space.width}x${space.height}`,
             elements: space.elements.map(e => ({
                 id: e.id,
                 element: {
@@ -274,6 +281,7 @@ spaceRouter.get("/:spaceId", async (req, res) => {
                 y:e.y
             }))
         }
+        
         res.json(response)
 
     }catch(e){

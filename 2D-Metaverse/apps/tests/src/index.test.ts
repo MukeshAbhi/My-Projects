@@ -68,7 +68,7 @@ const mapAndElementsCreate = async (adminToken : string) => {
     }).set({
         "authorization" : `Bearer ${adminToken}`
     });
-
+   
     const element2Response = await request(BACKEND_URL).post(`/api/v1/admin/element`).send({
         "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
         "width": 1,
@@ -78,8 +78,8 @@ const mapAndElementsCreate = async (adminToken : string) => {
         "authorization" : `Bearer ${adminToken}`
     });
 
-    element1Id = element1Response.body.id;
-    element2Id = element2Response.body.id;
+    element1Id = element1Response.body.elementId;
+    element2Id = element2Response.body.elementId;
 
     const mapResponse = await request(BACKEND_URL).post(`/api/v1/admin/map`).send({
         "thumbnail": "https://thumbnail.com/a.png",
@@ -110,407 +110,412 @@ const mapAndElementsCreate = async (adminToken : string) => {
 
     return {mapId,element1Id,element2Id};
 }
+// completed
+describe("Authentication", () => {
+    test("User is able to sign up ONLY Once", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = '123456';
 
-// describe("Authentication", () => {
-//     test("User is able to sign up ONLY Once", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = '123456';
+        const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type: "admin"
+        })
+        expect(response.statusCode).toBe(200);
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type: "admin"
-//         })
-//         expect(response.statusCode).toBe(200);
+        const updatedResponse = await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type: "admin"
+        })
+        expect(updatedResponse.statusCode).toBe(400);
 
-//         const updatedResponse = await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type: "admin"
-//         })
-//         expect(updatedResponse.statusCode).toBe(400);
+    });
 
-//     });
+    test("Signup request fails if username is empty", async () => {
+        const password = '123456';
 
-//     test("Signup request fails if username is empty", async () => {
-//         const password = '123456';
+        const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            password,
+            type: "admin"
+        })
+        expect(response.statusCode).toBe(400);
+    });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             password,
-//             type: "admin"
-//         })
-//         expect(response.statusCode).toBe(400);
-//     });
+    test("Signup request fails if pssword is empty", async () => {
+        const username = `abhi-${Math.random()}`
+        const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            type: "admin"
+        })
+        expect(response.statusCode).toBe(400);
+    });
 
-//     test("Signup request fails if pssword is empty", async () => {
-//         const username = `abhi-${Math.random()}`
-//         const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             type: "admin"
-//         })
-//         expect(response.statusCode).toBe(400);
-//     });
+    test("Signup request fails if password is less than 6 letters", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = '12345';
 
-//     test("Signup request fails if password is less than 6 letters", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = '12345';
+        const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type: "admin"
+        })
+        expect(response.statusCode).toBe(400);
+    });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type: "admin"
-//         })
-//         expect(response.statusCode).toBe(400);
-//     });
+    test("Signin succeeds if the username and password are correct ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
 
-//     test("Signin succeeds if the username and password are correct ", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = "123456";
-//         await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type : 'admin'
-//             });
+        const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
+            username,
+            password
+        });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
-//             username,
-//             password
-//         });
+        expect(response.statusCode).toBe(200);
+        expect(response.body.token).toBeDefined();
+    });
 
-//         expect(response.statusCode).toBe(200);
-//         expect(response.body.token).toBeDefined();
-//     });
+    test("Signin fails if the username  is incorrect ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
 
-//     test("Signin fails if the username  is incorrect ", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = "123456";
-//         await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type : 'admin'
-//             });
+        const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
+            username : "WrongUsername",
+            password
+        });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
-//             username : "WrongUsername",
-//             password
-//         });
+        expect(response.statusCode).toBe(403);
+    });
 
-//         expect(response.statusCode).toBe(403);
-//     });
+    test("Signin fails if the password  is incorrect ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
 
-//     test("Signin fails if the password  is incorrect ", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = "123456";
-//         await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type : 'admin'
-//             });
+        const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
+            username ,
+            password : "wrongpassword"
+        });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
-//             username ,
-//             password : "wrongpassword"
-//         });
+        expect(response.statusCode).toBe(403);
+    });
 
-//         expect(response.statusCode).toBe(403);
-//     });
+    test("Signin fails if the username  empty ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
 
-//     test("Signin fails if the username  empty ", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = "123456";
-//         await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type : 'admin'
-//             });
+        const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
+            password
+        });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
-//             password
-//         });
+        expect(response.statusCode).toBe(403);
+    });
 
-//         expect(response.statusCode).toBe(403);
-//     });
+    test("Signin fails if the password is empty ", async () => {
+        const username = `abhi-${Math.random()}`;
+        const password = "123456";
+        await request(BACKEND_URL).post(`/api/v1/signup`).send({
+            username,
+            password,
+            type : 'admin'
+            });
 
-//     test("Signin fails if the password is empty ", async () => {
-//         const username = `abhi-${Math.random()}`;
-//         const password = "123456";
-//         await request(BACKEND_URL).post(`/api/v1/signup`).send({
-//             username,
-//             password,
-//             type : 'admin'
-//             });
+        const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
+            username,
+        });
 
-//         const response = await request(BACKEND_URL).post(`/api/v1/signin`).send({
-//             username,
-//         });
+        expect(response.statusCode).toBe(403);
+    });
 
-//         expect(response.statusCode).toBe(403);
-//     });
+    // add more auth tests for robust backend
+});
 
-//     // add more auth tests for robust backend
-// });
+//completed
+describe("User metadata data endpoints", () => {
+    let adminToken = '';
+    let userToken = '';
+    let avatarId = '';
 
-// describe("User metadata data endpoints", () => {
-//     let adminToken = '';
-//     let userToken = '';
-//     let avatarId = '';
+    beforeAll(async () => {
 
-//     beforeAll(async () => {
+        ({adminToken} = await adminCreate());
+        ({userToken} = await userCreate());
 
-//         ({adminToken} = await adminCreate());
-//         ({userToken} = await userCreate());
+        const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`});
 
-//         const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
-//             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//             "name": "Timmy"
-//         }).set({"authorization" : `Bearer ${adminToken}`});
+        avatarId = avataResponse.body.id
+    })
 
-//         avatarId = avataResponse.body.id
-//     })
+    test("User cant update their metadata with an invalid avatar ID", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
+            avatarId : "123456789789" // Invalid Id
+        }).set({"authorization": `Bearer ${userToken}`})
+        expect(response.statusCode).toBe(400);
+    })
 
-//     test("User cant update their metadata with an invalid avatar ID", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
-//             avatarId : "123456789789" // Invalid Id
-//         }).set({"authorization": `Bearer ${userToken}`})
-//         expect(response.statusCode).toBe(400);
-//     })
-
-//     test("User can update their metadata with a valid avatar ID", async () => {
-//         const precursor = await request(BACKEND_URL).post(`/api/v1/user/addmetadata`).send({
-//             avatarId 
-//         }).set({"authorization": `Bearer ${userToken}`})
-//         const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
-//             avatarId 
-//         }).set({"authorization": `Bearer ${userToken}`})
-//         expect(response.statusCode).toBe(200);
-//     })
+    test("User can update their metadata with a valid avatar ID", async () => {
+        const precursor = await request(BACKEND_URL).post(`/api/v1/user/addmetadata`).send({
+            avatarId 
+        }).set({"authorization": `Bearer ${userToken}`})
+        const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
+            avatarId 
+        }).set({"authorization": `Bearer ${userToken}`})
+        expect(response.statusCode).toBe(200);
+    })
     
-//     test("User is not able to update there meta data if not provide auth header", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
-//             avatarId
-//         });
-//         expect(response.statusCode).toBe(403);
-//     })
-// });
+    test("User is not able to update there meta data if not provide auth header", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/user/metadata`).send({
+            avatarId
+        });
+        expect(response.statusCode).toBe(401);
+    })
+});
 
-// describe("User avatar information", () => {
-//     let userToken  = '';
-//     let avatarId = '';
-//     let userId = '';
-//     let userId1 = '';
-//     let adminToken = '';
-//     let avatarId1 = '';
-//     let userToken1 = '';
+//completed
+describe("User avatar information", () => {
+    let userToken  = '';
+    let avatarId = '';
+    let userId = '';
+    let userId1 = '';
+    let adminToken = '';
+    let avatarId1 = '';
+    let userToken1 = '';
 
-//     beforeAll(async () => {
+    beforeAll(async () => {
         
-//        ({userId, userToken } = await userCreate());
-//        ({adminToken} = await adminCreate());
+       ({userId, userToken } = await userCreate());
+       ({adminToken} = await adminCreate());
 
-//         const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
-//             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//             "name": "Timmy"
-//         }).set({"authorization" : `Bearer ${adminToken}`})
+        const avataResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`})
 
-//         avatarId = avataResponse.body.id;
+        avatarId = avataResponse.body.id;
 
-//         ({userId: userId1,userToken: userToken1 } = await userCreate());
+        ({userId: userId1,userToken: userToken1 } = await userCreate());
 
-//         const avataResponse1 = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
-//             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-//             "name": "Timmy"
-//         }).set({"authorization" : `Bearer ${adminToken}`})
+        const avataResponse1 = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`})
 
-//         avatarId1 = avataResponse1.body.id;
-//     })
+        avatarId1 = avataResponse1.body.id;
+    })
 
-//     test("Get back avatar information for a user", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/user/metadata/bulk?ids=[${userId},${userId1}]`).set({
-//             "authorization" :`Bearer ${userToken}`
-//         });
+    test("Get back avatar information for a user", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/user/metadata/bulk?ids=[${userId},${userId1}]`).set({
+            "authorization" :`Bearer ${userToken}`
+        });
 
-//         expect(response.body.avatars.length).toBe(1);
-//         expect(response.body.avatars[0].userId).toBe(userId1);
-//     });
+        expect(response.body.avatars.length).toBe(1);
+        expect(response.body.avatars[0].userId).toBe(userId1);
+    });
 
-//     test("Available avatars lists the reacently created avatars", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/avatars`).set({
-//             "authorization" :`Bearer ${userToken}`
-//         });
+    test("Available avatars lists the reacently created avatars", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/avatars`).set({
+            "authorization" :`Bearer ${userToken}`
+        });
 
-//         expect(response.body.avatars.length).not.toBe(0);
+        expect(response.body.avatars.length).not.toBe(0);
 
-//         const currentAvatar = response.body.avatars.find((x: { id: string; }) => x.id === avatarId);
-//         expect(currentAvatar).toBeDefined();
+        const currentAvatar = response.body.avatars.find((x: { id: string; }) => x.id === avatarId);
+        expect(currentAvatar).toBeDefined();
 
-//     })
-// });
+    })
+});
 
-// describe("Space information", () => {
-//     let mapId = "";
-//     let adminToken = "";
-//     let userToken = "";
+//completed
+describe("Space information", () => {
+    let mapId = "";
+    let adminToken = "";
+    let userToken = "";
 
-//     beforeAll(async () => {
+    beforeAll(async () => {
         
-//         ({adminToken} = await adminCreate());
+        ({adminToken} = await adminCreate());
 
-//         ({mapId} = await mapAndElementsCreate(adminToken));
+        ({mapId} = await mapAndElementsCreate(adminToken));
 
-//         ({userToken} = await userCreate());
+        ({userToken} = await userCreate());
 
-//     })
+    })
 
-//     test("User is able to create a Sapce", async () => {
-//         console.log(mapId);
-//         const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//             "name": "Test",
-//             "dimensions": "100x200",
-//             "mapId": mapId
-//        }).set({"authorization" : `Bearer ${userToken}`});
+    test("User is able to create a Sapce", async () => {
+        console.log(mapId);
+        const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name": "Test",
+            "dimensions": "100x200",
+            "mapId": mapId
+       }).set({"authorization" : `Bearer ${userToken}`});
 
-//        expect(response.body.spaceId).toBeDefined();
-//     });
+       expect(response.body.spaceId).toBeDefined();
+    });
 
-//     test("User is able to create a space without mapId(empty space)", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//             "name" : "Test",
-//             "dimensions" : "100x200"
-//         }).set({"authorization" : `Bearer ${userToken}`});
+    test("User is able to create a space without mapId(empty space)", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200"
+        }).set({"authorization" : `Bearer ${userToken}`});
 
-//         expect(response.body.spaceId).toBeDefined();
-//     })
+        expect(response.body.spaceId).toBeDefined();
+    })
 
-//     test("User is NOT able to create a space without mapId(empty space) AND dimensions", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//             "name" : "Test"
-//         }).set({"authorization" : `Bearer ${userToken}`});
-//         expect(response.statusCode).toBe(400);
-//     })
+    test("User is NOT able to create a space without mapId(empty space) AND dimensions", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name" : "Test"
+        }).set({"authorization" : `Bearer ${userToken}`});
+        expect(response.statusCode).toBe(400);
+    })
 
-//     test("User is NOT able to delete a space that does not exisst", async () => {
-//         const response = await request(BACKEND_URL).delete(`/api/v1/space/randomeSpaceId`)
-//             .set({"authorization" : `Bearer ${userToken}`});
-//         expect(response.statusCode).toBe(400);
-//     })
+    test("User is NOT able to delete a space that does not exisst", async () => {
+        const response = await request(BACKEND_URL).delete(`/api/v1/space/randomeSpaceId`)
+            .set({"authorization" : `Bearer ${userToken}`});
+        expect(response.statusCode).toBe(400);
+    })
 
-//     test("User is able to delete a space that does exisst", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//             "name" : "Test",
-//             "dimensions" : "100x200"
-//         }).set({"authorization" : `Bearer ${userToken}`});
+    test("User is able to delete a space that does exisst", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200"
+        }).set({"authorization" : `Bearer ${userToken}`});
 
-//         const deleteResponse = await request(BACKEND_URL).delete(`/api/v1/space/${response.body.spaceId}`)
-//             .set({"authorization" : `Bearer ${userToken}`});
+        const deleteResponse = await request(BACKEND_URL).delete(`/api/v1/space/${response.body.spaceId}`)
+            .set({"authorization" : `Bearer ${userToken}`});
 
-//         expect(deleteResponse.statusCode).toBe(200);
-//     })
+        expect(deleteResponse.statusCode).toBe(200);
+    })
 
-//     test("user should not able to delete a space created by another user", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//             "name" : "Test",
-//             "dimensions" : "100x200"
-//         }).set({"authorization" : `Bearer ${userToken}`});
+    test("user should not able to delete a space created by another user", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200"
+        }).set({"authorization" : `Bearer ${userToken}`});
 
-//         const deleteResponse = await request(BACKEND_URL).delete(`/api/v1/space/${response.body.spaceId}`)
-//             .set({"authorization" : `Bearer ${adminToken}`});
+        const deleteResponse = await request(BACKEND_URL).delete(`/api/v1/space/${response.body.spaceId}`)
+            .set({"authorization" : `Bearer ${adminToken}`});
 
-//         expect(deleteResponse.statusCode).toBe(403);
-//     })
+        expect(deleteResponse.statusCode).toBe(403);
+    })
 
-//     // test("Admin has no spaces initially", async () => {
-//     //     const response = await request(BACKEND_URL).get(`/api/v1/space/all`).set({"authorization" : `Bearer ${adminToken}`});
-//     //     expect(response.body.spaces.length).toBe(0);
-//     // })
+    test("Admin has no spaces initially", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/space/all`).set({"authorization" : `Bearer ${adminToken}`});
+        expect(response.body.spaces.length).toBe(0);
+    })
 
-//     // test("Admin has a spaces initially", async () => {
-//     //     const spaceCreatedResponse = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//     //         "name" : "Test",
-//     //         "dimensions" : "100x200"
-//     //     }).set({"authorization" : `Bearer ${adminToken}`});
+    test("Admin has a spaces initially", async () => {
+        const spaceCreatedResponse = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200"
+        }).set({"authorization" : `Bearer ${adminToken}`});
 
-//     //     const response = await request(BACKEND_URL).get(`/api/v1/space/all`).set({"authorization" : `Bearer ${adminToken}`});
-//     //     const filteredSpace = response.body.spaces.find((x: any) => x.id == spaceCreatedResponse.body.spaceId );
-//     //     expect(response.body.spaces.length).toBe(1);
-//     //     expect(filteredSpace).toBeDefined();
-//     // })
+        const response = await request(BACKEND_URL).get(`/api/v1/space/all`).set({"authorization" : `Bearer ${adminToken}`});
+        const filteredSpace = response.body.spaces.find((x: any) => x.id == spaceCreatedResponse.body.spaceId );
+        expect(response.body.spaces.length).toBe(1);
+        expect(filteredSpace).toBeDefined();
+    })
     
-// })
+})
 
-// describe("Arena endPoins", () => {
-//     let mapId = "";
-//     let element1Id = "";
-//     let adminToken = "";
-//     let userToken = "";
-//     let spaceId = "";
+//completed
+describe("Arena endPoins", () => {
+    let mapId = "";
+    let element1Id = "";
+    let adminToken = "";
+    let userToken = "";
+    let spaceId = "";
     
-//     beforeAll(async () => {
-//         ({adminToken} = await adminCreate());
+    beforeAll(async () => {
+        ({adminToken} = await adminCreate());
 
-//         ({mapId,element1Id} = await mapAndElementsCreate(adminToken));
+        ({mapId,element1Id} = await mapAndElementsCreate(adminToken));
 
-//         ({userToken} = await userCreate());
+        ({userToken} = await userCreate());
+  
+        const spaceResponse = await request(BACKEND_URL).post(`/api/v1/space`).send({
+            "name" : "Test",
+            "dimensions" : "100x200",
+            "mapId" : mapId
+        }).set({"authorization": `Bearer ${userToken}`});
 
+        spaceId = spaceResponse.body.spaceId;
+    })
 
-//         const spaceResponse = await request(BACKEND_URL).post(`/api/v1/space`).send({
-//             "name" : "Test",
-//             "dimensions" : "100x200",
-//             "mapId" : mapId
-//         }).set({"authorization": `Bearer ${userToken}`});
+    test("Incorrect space Id return a 400", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/space/123dmskkds22`).set({"authorization": `Bearer ${userToken}`});
+        expect(response.statusCode).toBe(400);
+    })
 
-//         spaceId = spaceResponse.body.id;
-    
-//     })
+    test("correct spaceId returns all elements", async () => {
+        const response = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({
+            "authorization": `Bearer ${userToken}`
+        });
+        
+        expect(response.body.dimensions).toBe('100x200');
+        expect(response.body.elements.length).toBe(4);
+    })
 
-//     test("Incorrect space Id return a 400", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/space/123dmskkds22`).set({"authorization": `Bearer ${userToken}`});
-//         expect(response.statusCode).toBe(400);
-//     })
+    // test("Delete an element ", async () => {
+    //     const response = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
 
-//     test("correct sopaceId returns all elements", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
-//         expect(response.body.dimensions).toBe("100x200");
-//         expect(response.body.elements.length).toBe(4);
-//     })
+    //     await request(BACKEND_URL).delete(`/api/v1/space/element`).send({
+    //         elementId : response.body.elements[0].spaceId
+    //     })
 
-//     test("Delete an element ", async () => {
-//         const response = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+    //     const newResponse = await request(BACKEND_URL).delete(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
 
-//         await request(BACKEND_URL).delete(`/api/v1/space/element`).send({
-//             spaceId: spaceId,
-//             elementId : response.body.elements[0].id
-//         })
+    //     expect(newResponse.body.elements.length).toBe(3);
+    // })
 
-//         const newResponse = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+    test("Addind an element works as expected", async () => {
+        await request(BACKEND_URL).post(`/api/v1/space/element`).send({
+            "elementId" : element1Id,
+            "spaceId" : spaceId,
+            "x" : 50,
+            "y" : 20
+        }).set({"authorization": `Bearer ${userToken}`});
 
-//         expect(newResponse.body.elements.length).toBe(3);
-//     })
+        const newResponse = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
 
-//     test("Addind an element works as expected", async () => {
-//         await request(BACKEND_URL).post(`/api/v1/space/element`).send({
-//             "elementId" : element1Id,
-//             "spaceId" : spaceId,
-//             "x" : 50,
-//             "y" : 20
-//         }).set({"authorization": `Bearer ${userToken}`});
+        expect(newResponse.body.elements.length).toBe(5);
+    })
 
-//         const newResponse = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+    test("Addind an element fails if element lies outside the dimensions", async () => {
+        const response = await request(BACKEND_URL).post(`/api/v1/space/element`).send({
+                "elementId" : element1Id,
+                "spaceId" : spaceId,
+                "x" : 3000,
+                "y" : 2000
+        }).set({"authorization": `Bearer ${adminToken}`});
 
-//         expect(newResponse.body.elements.length).toBe(4);
-//     })
+        expect(response.statusCode).toBe(400)
+    })
+})
 
-//     test("Addind an element fails if element lies outside the dimensions", async () => {
-//         const response = await request(BACKEND_URL).post(`/api/v1/space/element`).send({
-//                 "elementId" : element1Id,
-//                 "spaceId" : spaceId,
-//                 "x" : 3000,
-//                 "y" : 2000
-//         }).set({"authorization": `Bearer ${userToken}`});
-
-//         expect(response.statusCode).toBe(400)
-//     })
-// })
-
+//completed
 describe("Admin endPoints", () => {
     let adminToken = "";
     let adminId = "";
@@ -547,7 +552,7 @@ describe("Admin endPoints", () => {
             "name": "Timmy"
         }).set({"authorization" : `Bearer ${userToken}`})
 
-        const updateElementResponse = await request(BACKEND_URL).post(`/api/v1/admin/element/123`).send({
+        const updateElementResponse = await request(BACKEND_URL).put(`/api/v1/admin/element/123`).send({
             "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s"
         }).set({"authorization" : `Bearer ${userToken}`})
 
@@ -557,53 +562,53 @@ describe("Admin endPoints", () => {
         expect(updateElementResponse.statusCode).toBe(403);
     });
 
-    // test("Admin able to hit admin endpoints", async () => {
-    //     const elementResponse = await request(BACKEND_URL).post(`/api/v1/admin/element`).send({
-    //         "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
-    //         "width": 1,
-    //         "height": 1,
-    //         "static": true
-    //     }).set({
-    //         "authorization" : `Bearer ${adminToken}`
-    //     });
+    test("Admin able to hit admin endpoints", async () => {
+        const elementResponse = await request(BACKEND_URL).post(`/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+        }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
 
-    //     const mapResponse = await request(BACKEND_URL).post(`/api/v1/admin/map`).send({
-    //         "thumbnail": "https://thumbnail.com/a.png",
-    //         "dimensions": "100x200",
-    //         "name": "100 person interview room",
-    //         "defaultElements": []
-    //      }).set({
-    //         "authorization" : `Bearer ${adminToken}`
-    //     });
+        const mapResponse = await request(BACKEND_URL).post(`/api/v1/admin/map`).send({
+            "thumbnail": "https://thumbnail.com/a.png",
+            "dimensions": "100x200",
+            "name": "100 person interview room",
+            "defaultElements": []
+         }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
 
-    //     const avatarResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
-    //         "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
-    //         "name": "Timmy"
-    //     }).set({"authorization" : `Bearer ${adminToken}`})
+        const avatarResponse = await request(BACKEND_URL).post(`/api/v1/admin/avatar`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s",
+            "name": "Timmy"
+        }).set({"authorization" : `Bearer ${adminToken}`})
 
-    //     expect(elementResponse.statusCode).toBe(200);
-    //     expect(mapResponse.statusCode).toBe(200);
-    //     expect(avatarResponse.statusCode).toBe(200);
+        expect(elementResponse.statusCode).toBe(200);
+        expect(mapResponse.statusCode).toBe(200);
+        expect(avatarResponse.statusCode).toBe(200);
         
-    // });
+    });
 
-    // test("Admin is able to update element", async () => {
-    //     const elementResponse = await request(BACKEND_URL).post(`/api/v1/admin/element`).send({
-    //         "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
-    //         "width": 1,
-    //         "height": 1,
-    //         "static": true
-    //     }).set({
-    //         "authorization" : `Bearer ${adminToken}`
-    //     });
+    test("Admin is able to update element", async () => {
+        const elementResponse = await request(BACKEND_URL).post(`/api/v1/admin/element`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCRca3wAR4zjPPTzeIY9rSwbbqB6bB2hVkoTXN4eerXOIkJTG1GpZ9ZqSGYafQPToWy_JTcmV5RHXsAsWQC3tKnMlH_CsibsSZ5oJtbakq&usqp=CAE",
+            "width": 1,
+            "height": 1,
+            "static": true
+        }).set({
+            "authorization" : `Bearer ${adminToken}`
+        });
+        console.log(elementResponse.body.elementId)
+        const updateElementResponse = await request(BACKEND_URL).put(`/api/v1/admin/element/${elementResponse.body.elementId}`).send({
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s"
+        }).set({"authorization" : `Bearer ${adminToken}`})
 
-    //     const updateElementResponse = await request(BACKEND_URL).post(`/api/v1/admin/element/${elementResponse.body.id}`).send({
-    //         "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm3RFDZM21teuCMFYx_AROjt-AzUwDBROFww&s"
-    //     }).set({"authorization" : `Bearer ${adminToken}`})
+        expect(updateElementResponse.statusCode).toBe(200);
 
-    //     expect(updateElementResponse.statusCode).toBe(200);
-
-    // })
+    })
 })
 
 // describe("WebSockets tests", () => {

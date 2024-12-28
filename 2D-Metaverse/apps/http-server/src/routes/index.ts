@@ -10,8 +10,7 @@ import { JWT_SECRET } from "../config.js";
 
 export const router = Router();
 
-
-
+// tested
 router.post("/signup", async (req,res) => {
     const parsedData = signupSchema.safeParse(req.body);
     if (!parsedData.success) {
@@ -53,6 +52,7 @@ router.post("/signup", async (req,res) => {
     }
 });
 
+// tested
 router.post("/signin", async (req,res) => {
     const parsedData = signinSchema.safeParse(req.body);
     if (!parsedData.success) {

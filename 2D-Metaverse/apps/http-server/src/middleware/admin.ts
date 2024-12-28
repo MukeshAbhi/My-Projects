@@ -2,7 +2,7 @@ import {verify} from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
 import { NextFunction, Request, Response } from "express";
 
-export const adminMiddleware = (req: Request,res: Response ,next: NextFunction) => {
+export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const payload = req.headers.authorization;
     if (!payload) {
         res.status(401).json({messsage: "Unauthorized"});
