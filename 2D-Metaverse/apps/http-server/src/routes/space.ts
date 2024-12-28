@@ -87,6 +87,46 @@ spaceRouter.post("/", userMiddleware, async (req, res) => {
 
 })
 
+// route for user to delete elements of a space - tested
+spaceRouter.delete("/element", userMiddleware, async (req, res) => {
+    const id = req.body.elementId
+ 
+    if(typeof id !== "string") {
+        console.log("Invalid input")
+        res.status(400).json({message: "Invaild Inputs"});
+        return;
+    }
+
+    try{
+        // Find the space element and include the associated space
+        const spaceElements = await client.spaceElements.findFirst({
+            where: {
+                id: id
+            },include: {
+                space: true
+            }
+        });
+        
+        // Check if the element exists and the user is authorized
+        if (!spaceElements?.space.creatorId || (spaceElements.space.creatorId !== req.userId)) {
+            res.status(403).json({message: "Unauthorised"});
+            return;
+        };
+
+        // Delete the element
+        await client.spaceElements.delete({
+            where: {
+                id: id
+            }
+        })
+        // Respond with a 204 status for successful deletion
+        res.status(204).json({message: "Element deleted"});
+    }catch(e){
+        res.status(500).json({message: "Failed to delete element"});
+        return;
+    }
+})
+
 // route to delete space - tested
 spaceRouter.delete("/:spaceId", userMiddleware, async (req, res) => {
     const spaceId = req.params.spaceId;
@@ -150,7 +190,6 @@ spaceRouter.get("/all", userMiddleware, async (req , res) => {
             thumbnail: s.thumbnail,
             dimensions: `${s.width}x${s.height}`,
         }))
-        console.log("spaces: ", spaces)
         res.json({spaces})
     }catch(e) {
         console.error("Error fetching spaces: ", e);
@@ -174,68 +213,41 @@ spaceRouter.post("/element", userMiddleware , async (req, res) => {
                 id: parsedData.data.spaceId,
                 creatorId: req.userId
             },select: {
-                name: true
+                name: true,
+                width: true,
+                height: true
             }
         })
+
+        if(req.body.x < 0 || req.body.y < 0 || req.body.x > space?.width! || req.body.y > space?.height!) {
+            res.status(400).json({message: "Point is outside of the boundary"})
+            return
+        }
 
         if(!space) {
             res.status(400).json({ message: "Space not found" });
             return;
         }
 
-        await client.spaceElements.create({
+       const id =  await client.spaceElements.create({
             data:{
                 spaceId: parsedData.data.spaceId,
                 elementId: parsedData.data.elementId,
                 x: parsedData.data.x,
                 y: parsedData.data.y
-            },include: {
-                element: true
+            },select: {
+                id: true
             }
         })
+        if(!id){
+            res.status(400).json({message: "Failed to add element"});
+            return;
+        }
         
         res.json({message: "Successfully added a element"})
     }catch(e){
         console.error("Error adding element:", e);
         res.status(400).json({message: "Failed to add element"});
-        return;
-    }
-})
-
-spaceRouter.delete("/element", userMiddleware, async (req, res) => {
-    const id = req.body.id;
-    if(typeof id !== "string") {
-        res.status(400).json({message: "Invaild Inputs"});
-        return;
-    }
-
-    try{
-        // Find the space element and include the associated space
-        const spaceElement = await client.spaceElements.findFirst({
-            where: {
-                id: id
-            },include: {
-                space: true
-            }
-        });
-        console.log("spaceElement : ", spaceElement?.spaceId)
-        console.log("elementId : ", id)
-        // Check if the element exists and the user is authorized
-        if (!spaceElement?.space.creatorId || (spaceElement.space.creatorId !== req.userId)) {
-            res.status(403).json({message: "Unauthorised"});
-            return;
-        };
-
-        // Delete the element
-        await client.spaceElements.delete({
-            where: {
-                id: id
-            }
-        })
-        // Respond with a 204 status for successful deletion
-        res.status(204).json({message: "Element deleted"});
-    }catch(e){
-        res.status(500).json({message: "Failed to delete element"});
         return;
     }
 })
@@ -267,7 +279,7 @@ spaceRouter.get("/:spaceId", async (req, res) => {
         }
 
         const response = {
-            "dimensions": `${space.width}x${space.height}`,
+            dimensions: `${space.width}x${space.height}`,
             elements: space.elements.map(e => ({
                 id: e.id,
                 element: {

@@ -20,5 +20,6 @@ export const userMiddleware = async (req: Request,res: Response ,next: NextFunct
         next();
     }catch(e) {
         res.status(403).json({messsage: "Unauthorized"})
+        return;
     }
 } 

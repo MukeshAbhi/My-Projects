@@ -14,7 +14,7 @@ export const router = Router();
 router.post("/signup", async (req,res) => {
     const parsedData = signupSchema.safeParse(req.body);
     if (!parsedData.success) {
-        //console.log("Validation failed:", parsedData.error);
+        console.log("Validation failed:", parsedData.error);
         res.status(400).json({message: "Invalid Inputs"});
         return ;
     }

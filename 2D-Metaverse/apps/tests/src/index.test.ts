@@ -478,21 +478,9 @@ describe("Arena endPoins", () => {
         expect(response.body.elements.length).toBe(4);
     })
 
-    // test("Delete an element ", async () => {
-    //     const response = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
-
-    //     await request(BACKEND_URL).delete(`/api/v1/space/element`).send({
-    //         elementId : response.body.elements[0].spaceId
-    //     })
-
-    //     const newResponse = await request(BACKEND_URL).delete(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
-
-    //     expect(newResponse.body.elements.length).toBe(3);
-    // })
-
     test("Addind an element works as expected", async () => {
         await request(BACKEND_URL).post(`/api/v1/space/element`).send({
-            "elementId" : element1Id,
+            "elementId" : element1Id ,
             "spaceId" : spaceId,
             "x" : 50,
             "y" : 20
@@ -501,6 +489,20 @@ describe("Arena endPoins", () => {
         const newResponse = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
 
         expect(newResponse.body.elements.length).toBe(5);
+    })
+
+    test("Delete an element ", async () => {
+    
+        const response = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+        
+        await request(BACKEND_URL).delete(`/api/v1/space/element`)
+        .set({"authorization": `Bearer ${userToken}`})
+        .send({elementId : response.body.elements[0].id});
+        
+
+        const newResponse = await request(BACKEND_URL).get(`/api/v1/space/${spaceId}`).set({"authorization": `Bearer ${userToken}`});
+
+        expect(newResponse.body.elements.length).toBe(response.body.elements.length - 1);
     })
 
     test("Addind an element fails if element lies outside the dimensions", async () => {

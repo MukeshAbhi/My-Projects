@@ -5,6 +5,7 @@ import client from "@repo/db/client";
 
 export const adminRouter = Router();
 
+// route for admin to add an element  - tested
 adminRouter.post("/element", adminMiddleware, async (req, res) => {
     const parsedData = createElementSchema.safeParse(req.body);
     if(!parsedData.success){
@@ -36,6 +37,7 @@ adminRouter.post("/element", adminMiddleware, async (req, res) => {
    }
 })
 
+// route for element to update element - tested
 adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
     const parsedData = updateElementSchema.safeParse(req.body);
     if(!parsedData.success){
@@ -45,14 +47,12 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
     }
 
     const id = req.params.elementId;
-    console.log( "ElementId : ", id)
+    
     if(typeof id !== "string"){
         res.status(400).json({message: "Invalid inputs"});
         return;
     }
-    console.log( "ElementId : ", id)
     
-
     try {
         const element = await client.element.findUnique({
             where: {
@@ -78,7 +78,6 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
         console.log("Error updating element :", e)
         res.status(500).json({message: 'Internal Server Error'})
        }
-    
 })
 
 adminRouter.post("/avatar", adminMiddleware, async(req, res) => {
@@ -103,7 +102,6 @@ adminRouter.post("/avatar", adminMiddleware, async(req, res) => {
             res.status(400).json({message: "Failed to create Avatar"})
             return;
         }
-        console.log("Avatarid: ",avatar.id)
         res.json({id: avatar.id});
     }catch(e){
         console.log("Error creating avatar :", e)
