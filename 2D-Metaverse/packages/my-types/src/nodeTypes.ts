@@ -19,7 +19,7 @@ export const createSpaceSchema = z.object({
     name: z.string(),
     // to sanitize the dimesnsions variable to have only like 1000 x 1000 values
     dimensions: z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
-    mapId : z.string()
+    mapId : z.string().optional()
 })
 
 export const createElementSchema = z.object({

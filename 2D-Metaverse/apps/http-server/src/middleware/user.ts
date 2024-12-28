@@ -5,12 +5,12 @@ import { NextFunction, Request, Response } from "express";
 export const userMiddleware = async (req: Request,res: Response ,next: NextFunction) => {
     const payload = req.headers.authorization;
     if (!payload) {
-        res.status(403).json({messsage: "Unauthorized"});
+        res.status(401).json({messsage: "Unauthorized"});
         return;
     }
     const token = payload.split(' ')[1];
     if (!token) {
-        res.status(403).json({messsage: "Unauthorized"});
+        res.status(401).json({messsage: "Unauthorized"});
         return;
     }
 
@@ -19,6 +19,6 @@ export const userMiddleware = async (req: Request,res: Response ,next: NextFunct
         req.userId = decoded.userId;
         next();
     }catch(e) {
-        res.status(401).json({messsage: "Unauthorized"})
+        res.status(403).json({messsage: "Unauthorized"})
     }
 } 

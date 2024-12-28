@@ -119,8 +119,8 @@ adminRouter.post("/map", adminMiddleware, async (req, res) => {
         const mapId = await client.map.create({
             data: {
                 thumbnail: parsedData.data.thumbnail,
-                width: (parsedData.data.dimensions.split("x")[0]) as unknown as number,
-                height: (parsedData.data.dimensions.split("x")[1]) as unknown as number,
+                width: parseInt(parsedData.data.dimensions.split("x")[0] ?? "0"),
+                height: parseInt(parsedData.data.dimensions.split("x")[1] ?? "0"),
                 name: parsedData.data.name,
                 mapHasMultipleElements: {
                     create: parsedData.data.defaultElements.map(e => ({

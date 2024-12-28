@@ -63,16 +63,15 @@ userRouter.post("/metadata", userMiddleware, async(req, res) => {
 
 });
 
-// route to find all other users - not tested
+// route to find all other users metadata - tested
 userRouter.get("/metadata/bulk", userMiddleware, async (req, res) => {
     const payloads  = (req.query.ids ?? "[]") as string;
     if(!payloads) {
         res.status(403).json({message: "Failed to fetch users"});
         return;
     } 
-    // console.log('length: ',payloads.length)
-    const ids = payloads.slice(1, payloads.length - 2).split(",");
-    console.log("ids : ", ids)
+    // since receiving an string[] as payload need to slice i.e to remove [ ] - brackets and split to convert it to array 
+    const ids = payloads.slice(1, payloads.length - 1).split(",");
       
     try{
         const usersMetadata = await client.user.findMany({
@@ -85,8 +84,7 @@ userRouter.get("/metadata/bulk", userMiddleware, async (req, res) => {
                 id: true
             }
         })
-        console.log("usersMetadata : ", usersMetadata)
-        console.log("userId: ", req.userId)
+
         const response = usersMetadata
             .filter(m => m.id !== req.userId) // Exclude the requesting user's metadata
             .map(m => ({
@@ -94,8 +92,6 @@ userRouter.get("/metadata/bulk", userMiddleware, async (req, res) => {
                 imageUrl: m.avatar?.imageUrl
             }))
                             
-        
-        console.log("response: ",response);
         res.json({
             avatars:response
         })
