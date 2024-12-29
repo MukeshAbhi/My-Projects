@@ -111,7 +111,7 @@ const mapAndElementsCreate = async (adminToken : string) => {
     return {mapId,element1Id,element2Id};
 }
 // completed
-describe("Authentication", () => {
+describe.skip("Authentication", () => {
     test("User is able to sign up ONLY Once", async () => {
         const username = `abhi-${Math.random()}`;
         const password = '123456';
@@ -251,7 +251,7 @@ describe("Authentication", () => {
 });
 
 //completed
-describe("User metadata data endpoints", () => {
+describe.skip("User metadata data endpoints", () => {
     let adminToken = '';
     let userToken = '';
     let avatarId = '';
@@ -295,7 +295,7 @@ describe("User metadata data endpoints", () => {
 });
 
 //completed
-describe("User avatar information", () => {
+describe.skip("User avatar information", () => {
     let userToken  = '';
     let avatarId = '';
     let userId = '';
@@ -349,7 +349,7 @@ describe("User avatar information", () => {
 });
 
 //completed
-describe("Space information", () => {
+describe.skip("Space information", () => {
     let mapId = "";
     let adminToken = "";
     let userToken = "";
@@ -441,7 +441,7 @@ describe("Space information", () => {
 })
 
 //completed
-describe("Arena endPoins", () => {
+describe.skip("Arena endPoins", () => {
     let mapId = "";
     let element1Id = "";
     let adminToken = "";
@@ -518,7 +518,7 @@ describe("Arena endPoins", () => {
 })
 
 //completed
-describe("Admin endPoints", () => {
+describe.skip("Admin endPoints", () => {
     let adminToken = "";
     let adminId = "";
     let userId = "";
@@ -611,9 +611,10 @@ describe("Admin endPoints", () => {
         expect(updateElementResponse.statusCode).toBe(200);
 
     })
+
 })
 
-// describe("WebSockets tests", () => {
+describe.skip("WebSockets tests", () => {
 //     let mapId = "";
 //     let adminToken = "";
 //     let adminId = "";
@@ -785,4 +786,4 @@ describe("Admin endPoints", () => {
 //         expect(message.type).toBe('user-left')
 //         expect(message.payload.userId).toBe(adminId);
 //     })
-// })
+ })

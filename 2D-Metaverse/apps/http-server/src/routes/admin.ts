@@ -5,8 +5,9 @@ import client from "@repo/db/client";
 
 export const adminRouter = Router();
 
+adminRouter.use(adminMiddleware)
 // route for admin to add an element  - tested
-adminRouter.post("/element", adminMiddleware, async (req, res) => {
+adminRouter.post("/element", async (req, res) => {
     const parsedData = createElementSchema.safeParse(req.body);
     if(!parsedData.success){
         console.log("Validation error ", parsedData.error);
@@ -37,8 +38,8 @@ adminRouter.post("/element", adminMiddleware, async (req, res) => {
    }
 })
 
-// route for element to update element - tested
-adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
+// route for admin to update element - tested
+adminRouter.put("/element/:elementId", async (req, res) => {
     const parsedData = updateElementSchema.safeParse(req.body);
     if(!parsedData.success){
         console.log("Validation error ", parsedData.error);
@@ -80,7 +81,8 @@ adminRouter.put("/element/:elementId", adminMiddleware, async (req, res) => {
        }
 })
 
-adminRouter.post("/avatar", adminMiddleware, async(req, res) => {
+// route for admin to create an avatar - tested
+adminRouter.post("/avatar", async(req, res) => {
     const parsedData = createAvatarSchema.safeParse(req.body);
     if(!parsedData.success){
         console.log("Validation error ", parsedData.error);
@@ -109,7 +111,8 @@ adminRouter.post("/avatar", adminMiddleware, async(req, res) => {
     }
 })
 
-adminRouter.post("/map", adminMiddleware, async (req, res) => {
+// route for admin to create an avatar - tested
+adminRouter.post("/map", async (req, res) => {
     const parsedData = createMapSchema.safeParse(req.body);
     if(!parsedData.success){
         console.log("Validation error ", parsedData.error);

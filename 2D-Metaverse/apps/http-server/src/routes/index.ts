@@ -112,6 +112,7 @@ router.get("/elements", async(req, res) => {
     }
 })
 
+// tested
 router.get("/avatars", async (req, res) => {
     try {
         const avatars = await client.avatar.findMany({});

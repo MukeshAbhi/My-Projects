@@ -5,8 +5,10 @@ import { userMiddleware } from "../middleware/user";
 
 export const userRouter = Router();
 
+userRouter.use(userMiddleware);
+
 // route to add users metadata - tested
-userRouter.post("/addmetadata",userMiddleware, async(req, res) => {
+userRouter.post("/addmetadata", async(req, res) => {
     const parsedData = updateMetadataSchema.safeParse(req.body);
     if(!parsedData.success) {
         console.log("Validation error: ",parsedData.error);
@@ -28,7 +30,7 @@ userRouter.post("/addmetadata",userMiddleware, async(req, res) => {
 })
 
 // route to update user metadta - tested
-userRouter.post("/metadata", userMiddleware, async(req, res) => {
+userRouter.post("/metadata", async(req, res) => {
     const parsedData = updateMetadataSchema.safeParse(req.body);
 
     if(!parsedData.success) {
@@ -64,7 +66,7 @@ userRouter.post("/metadata", userMiddleware, async(req, res) => {
 });
 
 // route to find all other users metadata - tested
-userRouter.get("/metadata/bulk", userMiddleware, async (req, res) => {
+userRouter.get("/metadata/bulk", async (req, res) => {
     const payloads  = (req.query.ids ?? "[]") as string;
     if(!payloads) {
         res.status(403).json({message: "Failed to fetch users"});
