@@ -56,3 +56,4 @@ export const createMapSchema = z.object({
         }))
 })
 
+export type OutgoingMessage = any;
