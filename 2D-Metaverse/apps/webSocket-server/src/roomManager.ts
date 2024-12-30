@@ -22,6 +22,7 @@ export class RoomManager {
         return this.instance;
      }
 
+     // add user to a proper instance
      public addUser(spaceId : string, user: User) {
         if (!this.rooms.has(spaceId)) {
             this.rooms.set(spaceId,[user]);
@@ -31,14 +32,23 @@ export class RoomManager {
         this.rooms.set(spaceId, [...this.rooms.get(spaceId) ?? [], user])
      }
 
-     public broadcast (message : OutgoingMessage, user: User, roomId: string) {
-        if (!this.rooms.has(roomId)) {
+     // remove user from a proper instance 
+     public removeUser(spaceId: string, user: User) {
+        if(!this.rooms.has(spaceId)){
+            return;
+        }
+        this.rooms.set(spaceId, (this.rooms.get(spaceId)?.filter((u) => (u.userId !== user.userId)) ?? []));
+     }
+
+     // broadcast message to a proper room 
+     public broadcast (message : OutgoingMessage, user: User, spaceId: string) {
+        if (!this.rooms.has(spaceId)) {
             return;
         }
 
-        this.rooms.get(roomId)?.forEach((u)=> {
+        this.rooms.get(spaceId)?.forEach((u)=> {
             // other than the sender all should receive the message
-            if (u.id !== user.id) {
+            if (u.userId !== user.userId) {
                 u.send(message)
             }
         })
