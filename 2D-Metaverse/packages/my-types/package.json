@@ -4,8 +4,9 @@
   "main": "index.js",
   "type": "commonjs",
   "exports": {
-    "./nodeTypes" : "./src/nodeTypes.ts",
-    "./reactTypes": "./src/reactTypes.ts"
+    "./httpTypes" : "./src/httpTypes.ts",
+    "./reactTypes": "./src/reactTypes.ts",
+    "./wsTypes": "./src/wsTypes"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

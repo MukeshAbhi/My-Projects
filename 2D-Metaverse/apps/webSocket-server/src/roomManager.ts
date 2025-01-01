@@ -1,4 +1,4 @@
-import { OutgoingMessage } from "@repo/my-types/nodeTypes";
+import { OutgoingMessage } from "./type";
 import type { User } from "./user";
 
 
@@ -24,6 +24,7 @@ export class RoomManager {
 
      // add user to a proper instance
      public addUser(spaceId : string, user: User) {
+        console.log("RoomManager addUser")
         if (!this.rooms.has(spaceId)) {
             this.rooms.set(spaceId,[user]);
             return;
@@ -33,8 +34,10 @@ export class RoomManager {
      }
 
      // remove user from a proper instance 
-     public removeUser(spaceId: string, user: User) {
+     public removeUser(user : User, spaceId : string) {
+        console.log("RoomManager hi from removeuser")
         if(!this.rooms.has(spaceId)){
+            console.log("spcaeId not found")
             return;
         }
         this.rooms.set(spaceId, (this.rooms.get(spaceId)?.filter((u) => (u.userId !== user.userId)) ?? []));
@@ -42,10 +45,11 @@ export class RoomManager {
 
      // broadcast message to a proper room 
      public broadcast (message : OutgoingMessage, user: User, spaceId: string) {
+        console.log("RoomManager broadcast")
         if (!this.rooms.has(spaceId)) {
             return;
         }
-
+        console.log("RoomManager hi from broadcast")
         this.rooms.get(spaceId)?.forEach((u)=> {
             // other than the sender all should receive the message
             if (u.userId !== user.userId) {

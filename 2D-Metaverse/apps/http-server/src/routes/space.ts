@@ -1,4 +1,4 @@
-import { addElementSchema, createSpaceSchema } from "@repo/my-types/nodeTypes";
+import { addElementSchema, createSpaceSchema } from "@repo/my-types/httpTypes";
 import { Router } from "express";
 import client from "@repo/db/client"
 import { userMiddleware } from "../middleware/user";

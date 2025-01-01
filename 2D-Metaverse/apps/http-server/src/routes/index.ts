@@ -2,7 +2,7 @@ import { Router } from "express";
 import { userRouter } from "./user.js";
 import { spaceRouter } from "./space.js";
 import { adminRouter } from "./admin.js";
-import { signupSchema, signinSchema } from "@repo/my-types/nodeTypes"
+import { signupSchema, signinSchema } from "@repo/my-types/httpTypes"
 import client from "@repo/db/client";
 import bcrypt from "bcrypt";
 import {sign} from "jsonwebtoken";

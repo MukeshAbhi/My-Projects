@@ -1,5 +1,5 @@
 import z from "zod";
-import { addElementSchema, createAvatarSchema, createElementSchema, createMapSchema, createSpaceSchema, signinSchema, signupSchema, updateElementSchema, updateMetadataSchema } from "./nodeTypes";
+import { addElementSchema, createAvatarSchema, createElementSchema, createMapSchema, createSpaceSchema, signinSchema, signupSchema, updateElementSchema, updateMetadataSchema } from "./httpTypes";
 
 export type SignupParams = z.infer < typeof signupSchema>;
 

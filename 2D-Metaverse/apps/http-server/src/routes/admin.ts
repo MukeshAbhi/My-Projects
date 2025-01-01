@@ -1,4 +1,4 @@
-import { createAvatarSchema, createElementSchema, createMapSchema, updateElementSchema } from "@repo/my-types/nodeTypes";
+import { createAvatarSchema, createElementSchema, createMapSchema, updateElementSchema } from "@repo/my-types/httpTypes";
 import e, { Router } from "express";
 import { adminMiddleware } from "../middleware/admin";
 import client from "@repo/db/client";
