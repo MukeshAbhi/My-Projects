@@ -1,5 +1,5 @@
 import { createAvatarSchema, createElementSchema, createMapSchema, updateElementSchema } from "@repo/my-types/httpTypes";
-import e, { Router } from "express";
+import  { Router } from "express";
 import { adminMiddleware } from "../middleware/admin";
 import client from "@repo/db/client";
 
