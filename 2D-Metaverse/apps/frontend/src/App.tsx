@@ -1,16 +1,17 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
-import {Button} from '@repo/ui/button'
+import { Signup } from './pages/Signup'
+
 
 function App() {
   
 
   return (
-      <>
-          <h1 className="text-3xl font-bold underline bg-slate-600">
-              Hello world!
-          </h1>
-          <Button children="DMCKMDKCM" appName='react' />
-      </>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/signup' element={<Signup />}/>
+        </Routes>
+      </BrowserRouter>
   )
 }
 
