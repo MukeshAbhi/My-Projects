@@ -1,15 +1,33 @@
+import { useState } from "react"
 import NavBar from "../components/NavBar"
 
 
 export const Avatars = () => {
 
+    const [avatarId, setAvatarId] = useState("");
+
     const content = ()=> {
+        const mId = "JSJ58DKM";
+        const fId = "DSKVM55K";
+
+        const clickHandler = (a:number) => {
+            alert("done")
+            if(a === 0){
+                setAvatarId(mId)
+            }else{
+                setAvatarId(fId)
+            }
+            console.log(avatarId);
+            
+        }
+
         return (
-           
                 <div className=" flex justify-center ">
+
+                    {/* {Male character} */}
                     <div className="group">
-                        <button className="w-60 py-10 px-10 hover:w-64">
-                            <img className="w-full" src={"./public/images/adam.png"} alt="Adam" />
+                        <button className="w-60 py-10 px-10 hover:w-64" title="click to select"  onClick={()=>clickHandler(0)}>
+                            <img className="w-full" src={"./public/images/adam.png"} alt="Adam"  />
                         </button>
                         <div className="px-24">
                             <svg
@@ -25,10 +43,10 @@ export const Avatars = () => {
                         </div>
                     </div>
 
-                    
+                    {/* {Female character} */}
                     <div className="group">
-                        <button className="w-64 py-10 px-10 hover:w-72">
-                            <img className="w-full" src={"./public/images/alex.png"} alt="Alex" />
+                        <button className="w-64 py-10 px-10 hover:w-72"  title="click to select" onClick={()=>clickHandler(1)}>
+                            <img className="w-full" src={"./public/images/alex.png"} alt="Alex" id={"DSKVM55K"}/>
                         </button>
                         <div className="px-28 mt-2">
                             <svg
