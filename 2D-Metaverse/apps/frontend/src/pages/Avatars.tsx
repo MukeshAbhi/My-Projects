@@ -1,32 +1,39 @@
 import { useState } from "react"
 import NavBar from "../components/NavBar"
+import { useNavigate } from "react-router-dom";
 
 
 export const Avatars = () => {
 
     const [avatarId, setAvatarId] = useState("");
+    const navigate = useNavigate();
 
-    const content = ()=> {
+    const content = () => {
         const mId = "JSJ58DKM";
         const fId = "DSKVM55K";
 
-        const clickHandler = (a:number) => {
-            alert("done")
+        const imageClickHandler = (a:number) => {
             if(a === 0){
                 setAvatarId(mId)
             }else{
                 setAvatarId(fId)
             }
             console.log(avatarId);
-            
         }
 
+    const clickHandler = () => {
+        alert("done")
+        navigate("/maps")
+    }
         return (
+            <div> 
+                <div className=" flex justify-center font-body text-customOrange text-4xl">
+                    Select Avatar
+                </div>
                 <div className=" flex justify-center ">
-
                     {/* {Male character} */}
                     <div className="group">
-                        <button className="w-60 py-10 px-10 hover:w-64" title="click to select"  onClick={()=>clickHandler(0)}>
+                        <button className="w-60 py-10 px-10 hover:w-64" title="click to select"  onClick={()=>imageClickHandler(0)}>
                             <img className="w-full" src={"./public/images/adam.png"} alt="Adam"  />
                         </button>
                         <div className="px-24">
@@ -45,7 +52,7 @@ export const Avatars = () => {
 
                     {/* {Female character} */}
                     <div className="group">
-                        <button className="w-64 py-10 px-10 hover:w-72"  title="click to select" onClick={()=>clickHandler(1)}>
+                        <button className="w-64 py-10 px-10 hover:w-72"  title="click to select" onClick={()=>imageClickHandler(1)}>
                             <img className="w-full" src={"./public/images/alex.png"} alt="Alex" id={"DSKVM55K"}/>
                         </button>
                         <div className="px-28 mt-2">
@@ -62,11 +69,16 @@ export const Avatars = () => {
                         </div>
                     </div>
                 </div>
-        
+                <div className="flex justify-center">
+                    <button onClick={clickHandler}  className="font-body text-white bg-customOrange text-xl px-6 py-3 rounded-full hover:bg-orange-300 focus:bg-orange-500">
+                        Continue
+                    </button>
+                </div>
+            </div>
         )
     }
     return(
-        <div>
+        <div >
             <NavBar content={content()} />
         </div>
     )
