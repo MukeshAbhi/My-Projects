@@ -72,7 +72,7 @@ const NavBar: React.FC<Props> = ({ content }) => {
         <div className="bg-white shadow">
           <div className="container mx-auto">
             <div className="flex justify-between items-center py-4 px-4">
-              <h1 className="text-xl font-semibold text-customOrange">2D Metaverse</h1>
+              <h1 className="text-xl font-semibold text-customOrange"><Link to={"/home"}>CommuneX</Link> </h1>
               <div className="flex items-center">
                 <h1 className="text-xl font-semibold text-customOrange px-3">
                   <Link to="/avatars">Avatars</Link>
