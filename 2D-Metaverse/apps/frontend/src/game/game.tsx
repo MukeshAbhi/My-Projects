@@ -1,13 +1,23 @@
 import NewGame from "./main"
-import Creater from "./scene/creator"
-import Preloader from "./scene/preloader"
+import GameScene from "./scene/preloader"
+
+
 
 const Game = () => {
     const config = {
         type: Phaser.AUTO,
         width: 1000,
-        height: 1000,
-        scene: [Preloader, Creater],
+        height: 700,
+        scene: [GameScene],
+        physics: {
+            default: 'arcade',
+            arcade: {
+                debug: true
+            }
+        },
+        scale: {
+            zoom: 2
+        },
     }
 
     return (
