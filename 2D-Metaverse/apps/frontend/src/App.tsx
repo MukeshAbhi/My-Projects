@@ -6,6 +6,8 @@ import { Home } from './pages/Home'
 import { Avatars } from './pages/Avatars'
 import { Maps } from './pages/Maps'
 import { Space } from './pages/Space'
+import Game from './game/game'
+
 
 
 function App() {
@@ -20,6 +22,7 @@ function App() {
           <Route path='/avatars' element={<Avatars />}/>
           <Route path='/maps' element={<Maps />} />
           <Route path='/space' element={<Space />} />
+          <Route path='/game' element= {<Game />} />
         </Routes>
       </BrowserRouter>
   )

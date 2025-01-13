@@ -11,9 +11,9 @@ export default {
         body: ['Poppins']
       },
       backgroundImage: {
-        'my-image': "url(./public/images/bg2.jpg)",
-        'my-image2': "url(./public/images/bg.png)",
-        'my-image3': "url(./public/images/bg3.jpg)"
+        'my-image': "url(./images/bg2.jpg)",
+        'my-image2': "url(./images/bg.png)",
+        'my-image3': "url(./images/bg3.jpg)"
       },
       colors: {
         customOrange: 'rgb(228, 155, 15)',

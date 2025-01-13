@@ -34,7 +34,7 @@ export const Avatars = () => {
                     {/* {Male character} */}
                     <div className="group">
                         <button className="w-60 py-10 px-10 hover:w-64" title="click to select"  onClick={()=>imageClickHandler(0)}>
-                            <img className="w-full" src={"./public/images/adam.png"} alt="Adam"  />
+                            <img className="w-full" src={"./images/adam.png"} alt="Adam"  />
                         </button>
                         <div className="px-24">
                             <button  onClick={()=>imageClickHandler(0)} title="click to select">
@@ -55,7 +55,7 @@ export const Avatars = () => {
                     {/* {Female character} */}
                     <div className="group">
                         <button className="w-64 py-10 px-10 hover:w-72"  title="click to select" onClick={()=>imageClickHandler(1)}>
-                            <img className="w-full" src={"./public/images/alex.png"} alt="Alex" id={"DSKVM55K"}/>
+                            <img className="w-full" src={"./images/alex.png"} alt="Alex" id={"DSKVM55K"}/>
                         </button>
                         <div  className="px-28 mt-2">
                             <button onClick={()=>imageClickHandler(1)}  title="click to select">
