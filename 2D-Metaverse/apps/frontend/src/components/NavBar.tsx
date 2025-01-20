@@ -1,5 +1,6 @@
 import React, { useState, useEffect, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { Popup } from './Popup';
 
 type Props = {
   content: JSX.Element;
@@ -7,7 +8,7 @@ type Props = {
 
 const NavBar: React.FC<Props> = ({ content }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-
+  const [showModel, setShowModel] = useState<boolean>(false);
   const toggleSidebar = (e: MouseEvent<HTMLButtonElement>): void => {
     e.stopPropagation();
     setIsSidebarOpen(!isSidebarOpen);
@@ -74,6 +75,10 @@ const NavBar: React.FC<Props> = ({ content }) => {
             <div className="flex justify-between items-center py-4 px-4">
               <h1 className="text-xl font-semibold text-customOrange"><Link to={"/home"}>CommuneX</Link> </h1>
               <div className="flex items-center">
+                <button onClick={() => setShowModel(true)}>
+                  <h1 className="text-xl font-semibold text-customOrange px-3">Join
+                  </h1>
+                </button>
                 <h1 className="text-xl font-semibold text-customOrange px-3">
                   <Link to="/avatars">Avatars</Link>
                 </h1>
@@ -110,7 +115,7 @@ const NavBar: React.FC<Props> = ({ content }) => {
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-4">
-          {content}
+          {showModel ? <Popup onClose={() => setShowModel(false) } /> : content}
         </div>
       </div>
     </div>

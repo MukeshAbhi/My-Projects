@@ -37,7 +37,7 @@ router.post("/signup", async (req,res) => {
 
        const user = await client.user.create({
             data: {
-                avatarname: parsedData.data.avatarname,
+                avatarname: parsedData.data.avatarname!,
                 username: parsedData.data.username,
                 password: hashedPassword,
                 role: parsedData.data.type === "admin" ? "Admin" : "User"
