@@ -12,11 +12,13 @@ const Game = () => {
         physics: {
             default: 'arcade',
             arcade: {
-                debug: true
+                debug: false
             }
         },
         scale: {
-            zoom: 2
+            zoom: 1.2,
+            model: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
         },
     }
 

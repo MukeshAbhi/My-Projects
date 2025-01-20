@@ -15,7 +15,7 @@ datasource db {
 
 model User {
   id       String  @id @unique @default(cuid())
-  avatarname String @unique
+  avatarname String? @unique
   username String?  @unique
   password String  
   avatarId String?

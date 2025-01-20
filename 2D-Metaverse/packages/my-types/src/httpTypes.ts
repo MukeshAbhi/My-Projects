@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const signupSchema = z.object({
+    avatarname: z.string().optional(),
     username: z.string(),
     password: z.string().min(6),
     type: z.enum(["user", "admin"])
@@ -13,6 +14,11 @@ export const signinSchema = z.object({
 
 export const updateMetadataSchema = z.object({
     avatarId: z.string()
+})
+
+export const updateAvatarnameSchema = z.object({
+    avatarId: z.string(),
+    avatarname: z.string()
 })
 
 export const createSpaceSchema = z.object({

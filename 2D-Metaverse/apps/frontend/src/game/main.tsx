@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import Phaser from "phaser";
 
-const Game = ({config} : {config : Phaser.Types.Core.GameConfig}) => {
+const NewGame = ({config} : {config : Phaser.Types.Core.GameConfig}) => {
     const gameRef = useRef<HTMLDivElement | null>(null) 
 
     useEffect(() => {
@@ -15,8 +15,8 @@ const Game = ({config} : {config : Phaser.Types.Core.GameConfig}) => {
     }, [config])
 
     return (
-        <div ref={gameRef}  style={{width: '100%', height: '100%'}}/>
+        <div ref={gameRef}  style={{width: '100%', height: '100%', overflow: 'hidden', position: 'relative'}}/>
     )
 }
 
-export default Game;
+export default NewGame;

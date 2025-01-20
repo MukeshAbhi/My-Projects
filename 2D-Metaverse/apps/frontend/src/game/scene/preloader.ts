@@ -24,25 +24,25 @@ export default class GameScene extends Phaser.Scene {
         const tileSet1 = map.addTilesetImage('walls','image2');
         const tileSet2 = map.addTilesetImage('interior', 'image1');
 
-        const floor = map.createLayer('floor',tileSet1!);
+        map.createLayer('floor',tileSet1!);
         const objects = map.createLayer('objects', tileSet2!);
         const border = map.createLayer('border',tileSet1!)
 
         border?.setCollisionByProperty({collide: true});
         objects?.setCollisionByProperty({collide: true});
 
-        const debugGraphics = this.add.graphics().setAlpha(0.7);
-        border?.renderDebug(debugGraphics, {
-            tileColor: null,
-            collidingTileColor: new Phaser.Display.Color(243,234,43,255),
-            faceColor: new Phaser.Display.Color(40, 39, 37, 255)
-        })
+        // const debugGraphics = this.add.graphics().setAlpha(0.7);
+        // border?.renderDebug(debugGraphics, {
+        //     tileColor: null,
+        //     collidingTileColor: new Phaser.Display.Color(243,234,43,255),
+        //     faceColor: new Phaser.Display.Color(40, 39, 37, 255)
+        // })
 
-        objects?.renderDebug(debugGraphics, {
-            tileColor: null,
-            collidingTileColor: new Phaser.Display.Color(243,234,43,255),
-            faceColor: new Phaser.Display.Color(40, 39, 37, 255)
-        })
+        // objects?.renderDebug(debugGraphics, {
+        //     tileColor: null,
+        //     collidingTileColor: new Phaser.Display.Color(243,234,43,255),
+        //     faceColor: new Phaser.Display.Color(40, 39, 37, 255)
+        // })
 
         this.player0 = this.physics.add.sprite(40,40,'player')
         this.player0.body?.setSize(this.player0.width * 0.5, this.player0.height * 0.6)
@@ -104,7 +104,10 @@ export default class GameScene extends Phaser.Scene {
          })
 
         this.physics.add.collider(this.player0, objects!);
-        this.physics.add.collider(this.player0, border!)
+
+        this.physics.add.collider(this.player0, border!);
+
+        this.cameras.main.startFollow(this.player0, true)
     }
 
     update() {
