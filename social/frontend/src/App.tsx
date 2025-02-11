@@ -10,10 +10,11 @@ import { userAtom } from './store/atoms/userAtom';
 import { themeAtom } from './store/atoms/themeAtom';
 
 
+
 //Function to check authentication 
 const Layout = () => {
-  const user = useRecoilValue(userAtom).user;
-  console.log(typeof user);
+  const user = useRecoilValue(userAtom).user ;
+  console.log(user);
   const location = useLocation();
 
   return user?.token ? (
@@ -24,7 +25,7 @@ const Layout = () => {
 }
 
 function App() {
-
+  
   const theme = useRecoilValue(themeAtom);
   console.log(theme);
 
