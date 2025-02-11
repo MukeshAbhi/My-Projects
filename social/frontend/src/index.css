@@ -1,10 +1,12 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* This hides the visual scrollbar but still allows scrolling using gestures, keys, or mouse */
+
 ::-webkit-scrollbar {
-  display: none; /* Hides the scrollbar in WebKit-based browsers like Chrome and Safari */
-   -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  display: none;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;
 }
 
 .topbar{

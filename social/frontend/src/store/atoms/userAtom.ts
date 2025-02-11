@@ -1,7 +1,8 @@
 import { atom } from "recoil";
+import { User } from "../../types";
 
 type userAtom = {
-    user: any;
+    user: User;
     edit: boolean;
 }
 

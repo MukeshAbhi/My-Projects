@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{html,js,jsx}"],
+  content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
   theme: {
+    backgroundImage:{
+      bgNew: 'url(./new.jpg)'
+    },
     colors: {
       bgColor: "rgb(var(--color-bg) / <alpha-value>)",
       primary: "rgb(var(--color-primary) / <alpha-value>)",

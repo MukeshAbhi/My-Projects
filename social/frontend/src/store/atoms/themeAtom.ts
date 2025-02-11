@@ -2,6 +2,6 @@ import { atom } from "recoil";
 
 export const themeAtom = atom<string>({
     key: 'themeAtom',
-    default: window?.localStorage.getItem('theme') ?? 'light',
+    default: JSON.parse(window?.localStorage.getItem('theme')!) ?? 'dark',
 })
 
