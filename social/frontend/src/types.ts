@@ -3,13 +3,15 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
-    friends: Friend[];
-    views: string[];
-    verified: boolean;
-    createdAt: string;
-    updatedAt: string;
-    profileUrl: string;
+    friends?: Friend[];
+    views?: string[];
+    verified?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    profileUrl?: string;
     token: string;
+    profession?: string;
+    location?: string;
   }
 
   export interface Friend {

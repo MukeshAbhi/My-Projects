@@ -21,7 +21,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({type, pl
             )}
 
             <div>
-                <input type={type}
+                <input type={type ? type : "password" }
                        placeholder={placeholder}
                        name={name}
                        ref={ref}

@@ -13,7 +13,7 @@ const storedUser = localStorage.getItem("user");
 export const userAtom = atom<userAtom>({
     key:'userAtom',
     default: {
-        user: storedUser ? JSON.parse(storedUser) : null,
+        user: storedUser ? JSON.parse(storedUser) : defaultUser,
         edit: false,
     },
 });

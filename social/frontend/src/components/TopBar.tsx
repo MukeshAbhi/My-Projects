@@ -44,6 +44,7 @@ export const TopBar = () => {
                 onSubmit={handleSubmit(handleSearch)}
             >
                 <TextInput 
+                    type="text"
                     placeholder="Search..."
                     styles={`w-[18rem] lg:w-[38rem] rounded-l-full py-3`}
                     register={register('search')} name={""}                />
@@ -55,7 +56,7 @@ export const TopBar = () => {
             </form>
 
             {/* ICONS */}
-            <div className="flex gap-4 items-center text-ascent-1 text-md md:text-xl">
+            <div className="pl-10 md:pl-0 lg:pl-0  flex gap-4 items-center text-ascent-1 text-md md:text-xl">
                 <button onClick={clickHandler}>
                     {theme === "light" ? <Moon /> : <Sun />}
                 </button>
@@ -67,7 +68,7 @@ export const TopBar = () => {
                 <CustomButton 
                     onClick={() => logout(object.user) }
                     title="Log Out"
-                    containerStyles={`text-sm text-ascent-1 px-4 md:px-6 py-1 md:py-2 border border-[#666] rounded-full`}
+                    containerStyles={`text-sm text-ascent-1 px-2 md:px-6 py-1 md:py-2 border border-[#666] rounded-full`}
                 />
             </div>
         </div>

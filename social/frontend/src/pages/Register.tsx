@@ -105,7 +105,7 @@ export const Register = () => {
                             <TextInput 
                                 name="password"
                                 placeholder="password"
-                                type="text"
+                                type="password"
                                 label="Password"
                                 register={
                                     register("password", {
@@ -119,7 +119,7 @@ export const Register = () => {
                             <TextInput 
                                 name="confirmPassword"
                                 placeholder="password"
-                                type="text"
+                                type="password"
                                 label="Confirm Password"
                                 register={
                                     register("confirmPassword", {
