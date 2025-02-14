@@ -4,13 +4,11 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { CustomButton } from "../components/CustomButton";
 import { Loading } from "../components/Loading";
+import { ErrMsg } from "../types";
 
 export const Login = () => {
 
-    interface ErrMsg {
-        message: string;
-        status: string
-    }
+    
     const {register, handleSubmit, formState:{ errors }} = useForm({mode: "onChange"});
 
     const [errMsg, setErrMsg] = useState<ErrMsg>({

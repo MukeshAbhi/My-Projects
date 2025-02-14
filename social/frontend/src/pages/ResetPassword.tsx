@@ -3,12 +3,9 @@ import { useForm } from "react-hook-form"
 import { TextInput } from "../components/TextInput";
 import { Loading } from "../components/Loading";
 import { CustomButton } from "../components/CustomButton";
+import { ErrMsg } from "../types";
 
 export const ResetPassword = () => {
-    interface ErrMsg {
-        message: string;
-        status: string
-    }
 
     const [errMsg, setErrMsg] = useState<ErrMsg>({
         message: "",

@@ -3,12 +3,10 @@ import { TextInput } from "../components/TextInput"
 import { CustomButton } from "../components/CustomButton"
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ErrMsg } from "../types";
 
 export const Register = () => {
-    interface ErrMsg {
-        message: string;
-        status: string
-    }
+    
 
     const{register, handleSubmit, formState:{ errors}, getValues} = useForm({mode: "onChange"});
     

@@ -54,3 +54,8 @@ export interface User {
     updatedAt: string;
     __v: number; 
   }
+
+  export interface ErrMsg {
+    message: string;
+    status: string
+}
