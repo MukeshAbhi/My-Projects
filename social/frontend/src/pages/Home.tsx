@@ -3,7 +3,7 @@ import { userAtom } from "../store/atoms/userAtom"
 import { TopBar } from "../components/TopBar";
 import { ProfileCard } from "../components/ProfileCard";
 import { FriendsCard } from "../components/FriendsCard";
-import { requests, suggest } from "../assets/data";
+import { posts, requests, suggest } from "../assets/data";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
@@ -13,6 +13,7 @@ import { TextInput } from "../components/TextInput";
 import { useForm } from "react-hook-form";
 import { ErrMsg } from "../types";
 import { Loading } from "../components/Loading";
+import { PostCard } from "../components/PostCard";
 
 export const Home = () => {
     
@@ -154,6 +155,21 @@ export const Home = () => {
                         </div>
 
                     </form>
+
+                    {loading ? (<Loading />) : posts.length > 0 ? (
+                        posts.map((post) => (
+                            <PostCard key={post._id} post={post}
+                                      user={user}
+                                      deletePost={()=>{}}
+                                      likePost={()=>{}}
+                            />
+                        ))
+                    ) : (
+                        <div className="flex w-full h-full items-center justify-center">
+                            <p className="text-lg text-ascent-2"> No Post Available </p>
+                        </div>
+
+                    )}
                 </div>
 
                 {/* RIGHT */}

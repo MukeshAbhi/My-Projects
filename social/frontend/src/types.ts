@@ -34,12 +34,12 @@ export interface User {
     _id: string;
     userId: User;
     description: string;
-    image: string;
-    likes: string[]; // Array of user IDs who liked the post
-    comments: string[]; // Assuming comments are stored as an array of strings
+    image?: string;
+    likes?: string[]; // Array of user IDs who liked the post
+    comments?: string[]; // Assuming comments are stored as an array of strings
     createdAt: string;
     updatedAt: string;
-    __v: number;
+    __v?: number;
   }
 
   export interface PostComments {
