@@ -1,6 +1,9 @@
 import { atom } from "recoil";
+import { Post } from "../../types";
+import { posts } from "../../assets/data";
 
-export const postAtom = atom({
+const defaultPost = posts
+export const postAtom = atom<Post[]>({
     key: 'postAtom',
-    default: {},
+    default: defaultPost
 })

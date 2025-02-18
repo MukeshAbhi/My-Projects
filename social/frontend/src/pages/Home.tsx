@@ -1,4 +1,4 @@
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilValue } from "recoil"
 import { userAtom } from "../store/atoms/userAtom"
 import { TopBar } from "../components/TopBar";
 import { ProfileCard } from "../components/ProfileCard";
@@ -35,9 +35,6 @@ export const Home = () => {
         alert("Form submited")
     }
 
-    useEffect(() => {
-        console.log("Updated edit state from home:", edit);
-    }, [edit]);
     
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
