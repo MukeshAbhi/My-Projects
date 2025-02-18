@@ -1,11 +1,11 @@
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { userAtom } from "../store/atoms/userAtom";
 import { User } from "../types"
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
 import { UserPen, UserPlus, MapPinHouse, BriefcaseBusiness, Instagram, Facebook, Twitter  } from 'lucide-react';
-import { editUserSelector } from "../store/selectors/userSelector";
 import moment from "moment";
+
 
 
 type ProfileCardProps = {
@@ -14,8 +14,15 @@ type ProfileCardProps = {
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
 
+    const [object, setObject] = useRecoilState(userAtom);
     const proflileOwner = useRecoilValue(userAtom).user;
-    const setEdit = useSetRecoilState(editUserSelector);
+    
+    const clickHandler = () => {
+        setObject((currentValue) => ({
+            ...currentValue, edit: true
+        }))
+    };
+
     return(
         <div className="w-full bg-primary flex flex-col items-center shadow-sm rounded-xl px-6 py-4">
             <div className="w-full flex items-center justify-between border-b pb-5 border-[#66666645]">
@@ -37,7 +44,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
                 
                 <div>
                     {user?._id === proflileOwner?._id ? (
-                        <UserPen className="text-blue cursor-pointer" onClick={() => setEdit(true) } />
+                        <UserPen className="text-blue cursor-pointer" onClick={clickHandler } />
                     ): ( <button className="bg-[#0444a430] text-sm text-white p-1 rounded" 
                             onClick={() => {}} >
                         <UserPlus className="text-blue" />

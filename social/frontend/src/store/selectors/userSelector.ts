@@ -32,14 +32,9 @@ export const logoutSelector = selector({
     }
 }) 
 
-export const editUserSelector = selector<boolean>({
-    key: "editUserSelector",
-    get: ({get}) => get(userAtom).edit,
-    set: ({set, get}, newValue) => {
-        const currentUserState = get(userAtom);
-        set(userAtom, {...currentUserState, edit: newValue as boolean} )
-    }
-})
+
+
+
 
 
 

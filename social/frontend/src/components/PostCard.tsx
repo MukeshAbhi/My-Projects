@@ -184,7 +184,8 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                        }}
                     >
                         <MessageSquare size={20} />
-                        {post.comments?.length} {post.comments?.length ?? 1 > 1 ? "Comments" : "Comment"} 
+                        {post.comments?.length ?? 0} { (post.comments?.length ?? 0) > 1 ? "Comments" : "Comment"}
+
                     </p>
 
                     {user?._id === post.userId._id && 

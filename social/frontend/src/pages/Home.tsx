@@ -1,10 +1,10 @@
-import { useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
 import { userAtom } from "../store/atoms/userAtom"
 import { TopBar } from "../components/TopBar";
 import { ProfileCard } from "../components/ProfileCard";
 import { FriendsCard } from "../components/FriendsCard";
 import { posts, requests, suggest } from "../assets/data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
 import { CustomButton } from "../components/CustomButton";
@@ -14,10 +14,12 @@ import { useForm } from "react-hook-form";
 import { ErrMsg } from "../types";
 import { Loading } from "../components/Loading";
 import { PostCard } from "../components/PostCard";
+import { EditProfile } from "../components/EditProfile";
 
 export const Home = () => {
     
     const user = useRecoilValue(userAtom).user;
+    const edit = useRecoilValue(userAtom).edit;
     const [friendRequest, setFriendRequest] = useState(requests);
     const [suggestedFriends, setSuggestedFriends] = useState(suggest);
     const {register, handleSubmit, formState:{ errors }} = useForm();
@@ -33,6 +35,11 @@ export const Home = () => {
         alert("Form submited")
     }
 
+    useEffect(() => {
+        console.log("Updated edit state from home:", edit);
+    }, [edit]);
+    
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0]; // Use optional chaining
 
@@ -47,6 +54,7 @@ export const Home = () => {
     };
 
     return (
+        <>
         <div className="home w-full px-0 lg:px-10 pb-20 2xl:px-40 bg-bgColor  h-screen overflow-hidden">
             <TopBar />
 
@@ -263,10 +271,10 @@ export const Home = () => {
                         </div>
 
                     </div>
-                    
                 </div>
-
             </div>
         </div>
-    )
-}
+        {edit && <EditProfile />}
+        </>
+    );
+};
