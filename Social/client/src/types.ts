@@ -35,8 +35,8 @@ export interface User {
     userId: User;
     description: string;
     image?: string;
-    likes?: string[]; // Array of user IDs who liked the post
-    comments?: string[]; // Assuming comments are stored as an array of strings
+    likes?: string[]; 
+    comments?: PostComments[]; 
     createdAt: string;
     updatedAt: string;
     __v?: number;
