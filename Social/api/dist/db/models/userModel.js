@@ -52,14 +52,14 @@ const userSchema = new mongoose_1.default.Schema({
         type: String,
         required: [true, "Password is Required!"],
         minlength: [6, "Password length should be greater than 6 character"],
-        select: true,
+        select: false,
     },
     location: { type: String },
     profileUrl: { type: String },
     profession: { type: String },
     friends: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Users" }],
     views: [{ type: String }],
-    verified: { type: Boolean, default: false },
+    verified: { type: Boolean, default: true },
 }, { timestamps: true });
 const Users = mongoose_1.default.model("Users", userSchema);
 exports.default = Users;
