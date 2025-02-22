@@ -3,7 +3,7 @@ import { createTransport } from "nodemailer";
 import 'dotenv/config'
 import { v4 as uuidv4 } from "uuid"; 
 import { hash } from "bcrypt";
-import Verification from "../db/models/emailVerification";
+import Verification from "../db/models/emailVerificationModel";
 
 const { AUTH_EMAIL, AUTH_PASSWORD, APP_URL } = process.env;
 
@@ -21,7 +21,7 @@ export const sendVerificationEmail = async (user : any, res: Response) => {
 
     const token = _id + uuidv4();
 
-    const link = `${APP_URL}usrs/verify/R${_id}/${token}`;
+    const link = `${APP_URL}api/v1/usrs/verify/R${_id}/${token}`;
 
     const mailObject = {
         to: email,
@@ -69,11 +69,11 @@ export const sendVerificationEmail = async (user : any, res: Response) => {
                 })
                 .catch ( (err) => {
                     console.log(err);
-                    res.status(404).json({ messaage: "Somthing went wrong" })
+                    res.status(404).json({ message: "Somthing went wrong" })
                 });
         }
     } catch (error) {
         console.log(error);
-        res.status(404).json({ messaage: "Somthing went wrong" })
+        res.status(404).json({ message: "Somthing went wrong" })
     }
 };
