@@ -2,6 +2,7 @@ import  { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import Users from "../db/models/userModel";
 import { hash } from "bcrypt"
+import { sendVerificationEmail } from "./help";
 
 const registerSchema = z.object({
     firstName: z.string(),
@@ -37,8 +38,11 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
         if (!user) {
             console.log("Failed to create User / DB issue");
-            res.status(404).json({ message: "Failed to create User"})
+            res.status(404).json({ message: "Failed to create User"});
+            return;
         }
+
+        sendVerificationEmail(user, res);
 
     } catch (error) {
         console.log(error);

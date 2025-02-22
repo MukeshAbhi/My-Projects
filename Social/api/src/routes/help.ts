@@ -76,4 +76,4 @@ export const sendVerificationEmail = async (user : any, res: Response) => {
         console.log(error);
         res.status(404).json({ messaage: "Somthing went wrong" })
     }
-}
+};
