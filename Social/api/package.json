@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
-    "dev": "npm run build && nodemon dist/index.js"
+    "dev": "npm run build && node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +20,6 @@
     "mongoose": "^8.10.1",
     "morgan": "^1.10.0",
     "nodemailer": "^6.10.0",
-    "nodemon": "^3.1.9",
     "typescript": "^5.7.3",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
