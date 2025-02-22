@@ -1,5 +1,5 @@
 import { Response } from "express";
-import nodemailer, { createTransport } from "nodemailer";
+import { createTransport } from "nodemailer";
 import 'dotenv/config'
 import { v4 as uuidv4 } from "uuid"; 
 import { hash } from "bcrypt";

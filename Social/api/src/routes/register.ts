@@ -4,6 +4,7 @@ import Users from "../db/models/userModel";
 import { hash } from "bcrypt"
 import { sendVerificationEmail } from "./help";
 
+
 const registerSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),

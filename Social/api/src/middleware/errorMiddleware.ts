@@ -1,38 +1,33 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction} from "express";
+import { CustomError } from "../types";
 
-interface CustomError extends Error {
-  statusCode?: number;
-  code?: number;
-  keyValue?: Record<string, string>;
-  errors?: Record<string, { message: string }>;
-}
+const errorMiddleware = (
+  err: CustomError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Something went wrong!";
+  let success = "failed";
 
-const errorMiddleware = (error: unknown, req: Request, res: Response, next: NextFunction) => {
-  const defaultError = {
-    statusCode: 500,
-    success: "failed",
-    message: "Something went wrong",
-  };
-
-  if (typeof error === "object" && error !== null) {
-    const err = error as CustomError;
-
-    if (err.name === "ValidationError" && err.errors) {
-      defaultError.statusCode = 400;
-      defaultError.message = Object.values(err.errors)
-        .map((el) => el.message)
-        .join(", ");
-    }
-
-    if (err.code === 11000 && err.keyValue) {
-      defaultError.statusCode = 409;
-      defaultError.message = `${Object.values(err.keyValue).join(", ")} field has to be unique!`;
-    }
+  // Handle Mongoose Validation Error
+  if (err.name === "ValidationError" && err.errors) {
+    statusCode = 400;
+    message = Object.values(err.errors)
+      .map((el) => el.message)
+      .join(", ");
   }
 
-  res.status(defaultError.statusCode).json({
-    success: defaultError.success,
-    message: defaultError.message,
+  // Handle Duplicate Key Error (MongoDB)
+  if (err.code === 11000 && err.keyValue) {
+    statusCode = 400;
+    message = `${Object.values(err.keyValue).join(", ")} field must be unique!`;
+  }
+
+  res.status(statusCode).json({
+    success,
+    message,
   });
 };
 
