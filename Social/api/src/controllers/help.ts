@@ -19,9 +19,9 @@ let transporter = createTransport({
 export const sendVerificationEmail = async (user : any, res: Response) => {
     const { _id, email, lastName } = user;
 
-    const token = _id + uuidv4();
+    const token = uuidv4();
 
-    const link = `${APP_URL}api/v1/usrs/verify/R${_id}/${token}`;
+    const link = `${APP_URL}api/v1/users/verify/${_id}/${token}`;
 
     const mailObject = {
         to: email,
@@ -64,7 +64,7 @@ export const sendVerificationEmail = async (user : any, res: Response) => {
                     res.status(201).send({
                         success: "PENDING",
                         message:
-                            "Verification email has deen sent to your account. Check your email for further instructions."
+                            "Verification email has been sent to your account. Check your email for further instructions."
                     });
                 })
                 .catch ( (err) => {

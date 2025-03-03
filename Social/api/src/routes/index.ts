@@ -1,15 +1,11 @@
 import { Router } from "express";
-import { register } from "./register";
-import { login } from "./login";
-import path from "path";
-import { verifyEmail } from "./userVerification";
+import {authRouter }from "./authRoutes";
+import { userRouter } from "./userRoutes";
 
-export const router = Router() ;
 
-const __dirname = path.resolve(path.dirname(""));
+export const mainRouter = Router();
 
-router.post("/register", register);
+mainRouter.use(`/auth`, authRouter); //auth/register
+mainRouter.use(`/users`, userRouter);
+// router.use(`/posts`, postRoute);
 
-router.post("/login", login);
-
-router.get("/verify/:userId/:token", verifyEmail);

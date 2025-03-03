@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import { router } from "./routes";
 import 'dotenv/config';
 import dbConnection from "./db";
 import errorMiddleware from "./middleware/errorMiddleware";
+import { mainRouter } from "./routes";
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(morgan("dev"));
 
-app.use("/api/v1",router);
+app.use("/api/v1",mainRouter);
 
 //error middleware
 app.use(errorMiddleware)

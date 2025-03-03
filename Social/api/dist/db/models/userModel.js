@@ -59,7 +59,7 @@ const userSchema = new mongoose_1.default.Schema({
     profession: { type: String },
     friends: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Users" }],
     views: [{ type: String }],
-    verified: { type: Boolean, default: true },
+    verified: { type: Boolean, default: false },
 }, { timestamps: true });
 const Users = mongoose_1.default.model("Users", userSchema);
 exports.default = Users;
