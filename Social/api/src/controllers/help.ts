@@ -4,6 +4,7 @@ import 'dotenv/config'
 import { v4 as uuidv4 } from "uuid"; 
 import { hash } from "bcrypt";
 import Verification from "../db/models/emailVerificationModel";
+import PasswordReset from "../db/models/PasswordReset";
 
 const { AUTH_EMAIL, AUTH_PASSWORD, APP_URL } = process.env;
 
@@ -77,3 +78,54 @@ export const sendVerificationEmail = async (user : any, res: Response) => {
         res.status(404).json({ message: "Somthing went wrong" })
     }
 };
+
+export const resetPasswordLink = async (user : any, res: Response) => {
+    const { _id, email } = user;
+
+    const token = _id + uuidv4();
+    const link = `${APP_URL}user/reset-password/${_id}/${token}`;
+
+    const mailObject = {
+        from: AUTH_EMAIL,
+        to: email,
+        subject: "Password Reset",
+        html:   `<p style="font-family: Arial, sans-serif; font-size: 16px; color: #333; background-color: #f7f7f7; padding: 20px; border-radius: 5px;">
+                    Password reset link. Please click the link below to reset password.
+                    <br>
+                        <p style="font-size: 18px;"><b>This link expires in 10 minutes</b></p>
+                    <br>
+                    <a href=${link} style="color: #fff; padding: 10px; text-decoration: none; background-color: #000;  border-radius: 8px; font-size: 18px; ">Reset Password</a>.
+                </p>`
+    };
+
+    try {
+        const hashedToken = await hash(token, 10);
+
+        const resetEmail = await PasswordReset.create({
+            userId: _id,
+            email: email,
+            token: hashedToken,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + 600000,
+        });
+
+        if (resetEmail) {
+            transporter
+                .sendMail(mailObject)
+                .then(() => {
+                    res.status(201).send({
+                        status: "PENDING",
+                        message: "Reset Password Link has been sent to your account",
+                    });
+                })
+                .catch ( (err) => {
+                    console.log(err);
+                    res.status(404).json({ message: "Somthing went wrong" });
+                });
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: "Somthing went wrong" });
+    }
+}
