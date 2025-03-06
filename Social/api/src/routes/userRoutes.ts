@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { changePassword, requestPasswordReset, resetPassword, verifyEmail } from "../controllers/user";
-import { resetPasswordLink } from "../controllers/help";
+
 
 export const userRouter = Router();
 

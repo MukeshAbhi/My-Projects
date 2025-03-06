@@ -94,14 +94,14 @@ export const resetPassword = async (req: Request, res: Response) => {
 
         if (!user) {
             const message = "Invalid Link. Try again";
-            res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+            res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
         }
 
         const resetPassword = await PasswordReset.findOne({ userId});
         
         if (!resetPassword) {
             const message = "Invalid Link. Try again";
-            res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+            res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
             throw new Error("Reset password token not found.");
         }
 
@@ -109,15 +109,15 @@ export const resetPassword = async (req: Request, res: Response) => {
 
         if (expiresAt && expiresAt.getTime() < Date.now()) {
             const message = "Link has expired. Please try again!"
-            res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+            res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
         } else {
             const isMatch = compare(token, resetToken as string);
 
             if (!isMatch) {
                 const message = "Invalid Link. Try again";
-                res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+                res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
             } else {
-                res.redirect(`${CLIENT_URL}/users/resetpassword?type=reset&id=${userId}`);
+                res.redirect(`${CLIENT_URL}users/resetpassword?type=reset&id=${userId}`);
             }
         }
     } catch (err) {
@@ -141,10 +141,10 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     
             if (user) {
                 await PasswordReset.findOneAndDelete({ userId });
-        
-                res.status(200).json({
-                    ok: true,
-                });
+
+                const message = "Password rest is successfull"
+                res.redirect(`${CLIENT_URL}users/resetpassword?status=success&message=${message}`);
+                return;
             }
         } catch (error) {
             console.log(error);

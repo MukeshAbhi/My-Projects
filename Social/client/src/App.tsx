@@ -8,7 +8,9 @@ import { ResetPassword } from './pages/ResetPassword';
 import { useRecoilValue } from 'recoil';
 import { userAtom } from './store/atoms/userAtom';
 import { themeAtom } from './store/atoms/themeAtom';
-import EmailVerification from './pages/Verify';
+import EmailVerification from './pages/EmailVerify';
+import { ChangePassword } from './pages/ChangePassword';
+import ResetPasswordSuccess from './pages/ResetPasswordSuccess';
 
 
 
@@ -46,6 +48,8 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/reset-password' element={<ResetPassword />} />
           <Route  path='/users/verified' element={<EmailVerification />} />
+          <Route path='/users/change-password' element={<ChangePassword />} />
+          <Route path='/users/reset-success' element={<ResetPasswordSuccess />} />
         </Routes>
       </BrowserRouter>
     </div>
