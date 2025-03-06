@@ -1,7 +1,7 @@
-import {  Request, Response } from "express";
+import {  NextFunction, Request, Response } from "express";
 import Verification from "../db/models/emailVerificationModel";
 import Users from "../db/models/userModel";
-import { compare } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import { CustomError } from "../types";
 import PasswordReset from "../db/models/PasswordReset";
 import { resetPasswordLink } from "./help";
@@ -48,7 +48,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
     }
 };
 
-export const requestPassword = async (req: Request, res: Response) => {
+export const requestPasswordReset = async (req: Request, res: Response) => {
     
     try {
 
@@ -84,6 +84,73 @@ export const requestPassword = async (req: Request, res: Response) => {
         console.log(error);
         res.status(404).json({message: error})
     }
+}
+
+export const resetPassword = async (req: Request, res: Response) => {
+    const { userId, token } = req.params;
+
+    try {
+        const user = await Users.findOne({ _id : userId});
+
+        if (!user) {
+            const message = "Invalid Link. Try again";
+            res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+        }
+
+        const resetPassword = await PasswordReset.findOne({ userId});
+        
+        if (!resetPassword) {
+            const message = "Invalid Link. Try again";
+            res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+            throw new Error("Reset password token not found.");
+        }
+
+        const { expiresAt, token: resetToken } = resetPassword;
+
+        if (expiresAt && expiresAt.getTime() < Date.now()) {
+            const message = "Link has expired. Please try again!"
+            res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+        } else {
+            const isMatch = compare(token, resetToken as string);
+
+            if (!isMatch) {
+                const message = "Invalid Link. Try again";
+                res.redirect(`${CLIENT_URL}/users/resetpassword?status=error&message=${message}`);
+            } else {
+                res.redirect(`${CLIENT_URL}/users/resetpassword?type=reset&id=${userId}`);
+            }
+        }
+    } catch (err) {
+        console.log(err)
+        res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=`);
+    }
+}
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const { userId, password } = req.body;
+    
+        const hashedpassword = await hash(password, 10);
+    
+        const user = await Users.findByIdAndUpdate(
+            { _id: userId },
+            { password: hashedpassword }
+        );
+    
+            if (user) {
+                await PasswordReset.findOneAndDelete({ userId });
+        
+                res.status(200).json({
+                    ok: true,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(404).json({ message: error });
+      }
+
 }
 
 
