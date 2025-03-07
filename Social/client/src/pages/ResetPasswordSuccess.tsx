@@ -3,6 +3,8 @@ import { useSearchParams, Link } from "react-router-dom";
 const ResetPasswordSuccess = () => {
   const [searchParams] = useSearchParams();
   const status = searchParams.get("status");
+  const message = searchParams.get("message");
+  console.log(status);
 
   return (
     <div className="max-w-md mx-auto mt-10 p-5 shadow-lg rounded-lg bg-white text-center">
@@ -13,7 +15,7 @@ const ResetPasswordSuccess = () => {
         </>
       ) : (
         <>
-          <h2 className="text-2xl font-bold text-red-500">Error Resetting Password</h2>
+          <h2 className="text-2xl font-bold text-red-500">{message}</h2>
           <p>Please try again later.</p>
         </>
       )}

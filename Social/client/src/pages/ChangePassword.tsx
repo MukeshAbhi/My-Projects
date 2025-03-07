@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { CustomButton } from "../components/CustomButton";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { log } from "console";
 
 export const ChangePassword = () => {
 
@@ -25,15 +26,18 @@ export const ChangePassword = () => {
         setLoading(true);
        
             try {
-                const ressponse = await axios.post(`${API_URL}/users/reset-password`,
+                console.log("here")
+                const ressponse = await axios.post(`${API_URL}users/reset-password`,
                     {
                         userId,
                         password: passwordValue
                     });
-                navigate("/reset-success?status=success");
+                const url = ressponse.data.redirectUrl;
+                console.log(url);
+                navigate(url);
               } catch (error) {
                 console.error(error);
-                navigate("/reset-success?status=error");
+                navigate("/users/reset-status?status=error&message=Something went wrong");
               }
               setLoading(false);
 };    
@@ -45,7 +49,7 @@ export const ChangePassword = () => {
                 <p className="text-ascent-1 text-2xl font-semibold ">Password</p>
 
                 <form 
-                    //onSubmit={handleSubmit(onSubmit)}  
+                    onSubmit={handleSubmit(onSubmit)}  
                     className="py-4 flex flex-col gap-5 "
                 >
                     <TextInput 
@@ -81,7 +85,7 @@ export const ChangePassword = () => {
                     
                     <CustomButton
                         type="submit" 
-                        title={"Submit"}
+                        title={loading ? "Updating..." : "Reset Password"}
                         containerStyles={`inline flex justify-center rounded-md bg-blue px-8 py-3 text-sm font-medium text-white outline-none`}
                     />
                 </form>

@@ -13,7 +13,12 @@ const routes_1 = require("./routes");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
 (0, db_1.default)();
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "http://localhost:5173", // Allow requests from your frontend
+    credentials: true, // Allow cookies if needed
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed request types
+    allowedHeaders: ["Content-Type", "Authorization"], // Explicitly allow headers
+}));
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, morgan_1.default)("dev"));

@@ -94,30 +94,33 @@ export const resetPassword = async (req: Request, res: Response) => {
 
         if (!user) {
             const message = "Invalid Link. Try again";
-            res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
+            res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+            return;
         }
 
         const resetPassword = await PasswordReset.findOne({ userId});
         
         if (!resetPassword) {
             const message = "Invalid Link. Try again";
-            res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
-            throw new Error("Reset password token not found.");
+            res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+            return;
         }
 
         const { expiresAt, token: resetToken } = resetPassword;
 
         if (expiresAt && expiresAt.getTime() < Date.now()) {
             const message = "Link has expired. Please try again!"
-            res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
+            res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+            return;
         } else {
             const isMatch = compare(token, resetToken as string);
 
             if (!isMatch) {
                 const message = "Invalid Link. Try again";
-                res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=${message}`);
+                res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+                return;
             } else {
-                res.redirect(`${CLIENT_URL}users/resetpassword?type=reset&id=${userId}`);
+                res.redirect(`${CLIENT_URL}users/change-password?type=reset&id=${userId}`);
             }
         }
     } catch (err) {
@@ -127,24 +130,27 @@ export const resetPassword = async (req: Request, res: Response) => {
 }
 
 export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
-
+    
     try {
 
         const { userId, password } = req.body;
     
         const hashedpassword = await hash(password, 10);
-    
+        
         const user = await Users.findByIdAndUpdate(
             { _id: userId },
             { password: hashedpassword }
         );
-    
+            
             if (user) {
                 await PasswordReset.findOneAndDelete({ userId });
-
-                const message = "Password rest is successfull"
-                res.redirect(`${CLIENT_URL}users/resetpassword?status=success&message=${message}`);
-                return;
+                console.log("Here");
+                const message = "Password rest is successfull";
+                res.json({
+                    status: "success",
+                    message: "Password reset successful",
+                    redirectUrl: `/users/reset-status?status=success&message=${message}`,
+                });
             }
         } catch (error) {
             console.log(error);
