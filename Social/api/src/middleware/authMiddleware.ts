@@ -34,6 +34,9 @@ export const authMiddleware = (req : Request, res: Response, next: NextFunction)
         req.body.user = {
             userId: userToken.userId
         };
+        console.log("herere");
+        
+        console.log(userToken);
         next();
     } catch (error) {
         console.log(error);

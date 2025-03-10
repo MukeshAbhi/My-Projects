@@ -167,6 +167,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
     try {
         // from middleware
         const { userId } = req.body.user;
+        console.log("here  ",userId)
         const { id } = req.params;
 
         const user = await Users.findById(id ?? userId).populate({
@@ -225,7 +226,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         }
 
         await user?.populate({path: "friends", select: "-password"});
-        const token = sign(user?._id, JWT_SECRET as string);
+        const token = sign({userId:user._id}, JWT_SECRET as string);
 
         user.password = "";
 
@@ -243,10 +244,9 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const friendRequest = async (req: Request, res: Response, next: NextFunction) => {
+export const sendFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { userId } = req.body.user;
-
         const { requestTo } = req.body;
 
         const requestExist = await FriendRequest.findOne({
@@ -282,6 +282,11 @@ export const friendRequest = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
+        res.status(201).json({
+            success: true,
+            message: "Friend Request sent successfully",
+        });
+
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -295,17 +300,20 @@ export const friendRequest = async (req: Request, res: Response, next: NextFunct
 export const getFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { userId } = req.body.user;
-
+            console.log(userId);
         const request = await FriendRequest.find({
             requestTo: userId,
             requestStatus: "Pending"
-        }).populate({
-            path: "requestFrom",
-            select: "firstName lastName profileUrl profession -password",
-        }).limit(10).sort({
-            _id: -1
         })
-
+            .populate({
+                path: "requestFrom",
+                select: "firstName lastName profileUrl profession",
+            })
+            .limit(10)
+            .sort({
+                _id: -1
+            })
+            
         res.status(200).json({
             success: true,
             data: request
@@ -380,10 +388,15 @@ export const profileViews = async (req: Request, res: Response, next: NextFuncti
    try {
     const { userId } = req.body.user;
     const { id } = req.body;
-
-    const user = await Users.findById(id);
-    user?.views.push(userId);
     
+    const user = await Users.findById(id);
+   
+    if (!user) {
+        res.status(404).json({ success: false, message: "User not found" });
+        return;
+    }
+    
+    user.views.push(userId);
     await user?.save();
 
     res.status(201).json({

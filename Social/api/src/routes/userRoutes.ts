@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changePassword, friendRequest, getFriendRequest, getUser, handleRequest, profileViews, requestPasswordReset, resetPassword, suggestedFriend, updateUser, verifyEmail } from "../controllers/user";
+import { changePassword, getFriendRequest, getUser, handleRequest, profileViews, requestPasswordReset, resetPassword, sendFriendRequest, suggestedFriend, updateUser, verifyEmail } from "../controllers/user";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 
@@ -19,7 +19,7 @@ userRouter.post("/get-user/:id?",authMiddleware, getUser)
 userRouter.put("/update-user", authMiddleware, updateUser )
 
 // friend request
-userRouter.post("/friend-request", authMiddleware, friendRequest);
+userRouter.post("/friend-request", authMiddleware, sendFriendRequest);
 userRouter.post("/get-friend-request", authMiddleware, getFriendRequest);
 
 // accept / deny friend request

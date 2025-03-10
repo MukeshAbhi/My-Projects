@@ -59,8 +59,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             return;
         };
 
-        const token = sign({ id: user._id}, JWT_SECRET as string )
-
+        const token = sign({ userId: user._id}, JWT_SECRET as string );
         res.status(201).json({
             success: true,
             message: "Logged in succesfully",
