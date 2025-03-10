@@ -87,7 +87,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
         console.log(error);
         res.status(404).json({message: error})
     }
-}
+};
 
 export const resetPassword = async (req: Request, res: Response) => {
     const { userId, token } = req.params;
@@ -130,7 +130,7 @@ export const resetPassword = async (req: Request, res: Response) => {
         console.log(err)
         res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=`);
     }
-}
+};
 
 export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
     
@@ -160,7 +160,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
             res.status(404).json({ message: error });
       }
 
-}
+};
 
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -197,7 +197,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
             error: error
         })
     }
-}
+};
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -241,7 +241,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         console.log(error);
         res.status(404).json({ message: error});
     }
-}
+};
 
 export const friendRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -290,7 +290,7 @@ export const friendRequest = async (req: Request, res: Response, next: NextFunct
             error: error 
         })
     }
-}
+};
 
 export const getFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -319,4 +319,117 @@ export const getFriendRequest = async (req: Request, res: Response, next: NextFu
             error: error 
         });
     }
+};
+
+export const handleRequest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.body.user;
+
+        const { rId, status } = req.body;
+
+        const requestExist = await FriendRequest.findById(rId);
+
+        if (!requestExist) {
+            const error = new CustomError("No Friend Request Found.");
+            next(error);
+            return;
+        };
+
+        const newRequest = await FriendRequest.findByIdAndUpdate({_id: rId}, { requestStatus: status});
+
+        if (!newRequest) {
+            const error = new CustomError("Failed to update.");
+            next(error);
+            return;
+        }
+
+        if ( status === "Accepted") {
+            const user = await Users.findById(userId);
+            const friend = await Users.findById(newRequest.requestFrom);
+
+            if (!user || !friend || !newRequest.requestFrom || !newRequest.requestTo) {
+                console.error("User or friend not found, or invalid request data.");
+                return;
+            }
+            // use transcation here 
+            user.friends.push(newRequest.requestFrom);
+            await user.save();
+
+            friend.friends.push(newRequest.requestTo);
+            await friend.save();
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'Friend Request ' + status,
+        })
+
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "auth error",
+            success: false,
+            error: error 
+        });
+    }
+};
+
+export const profileViews = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+    const { userId } = req.body.user;
+    const { id } = req.body;
+
+    const user = await Users.findById(id);
+    user?.views.push(userId);
+    
+    await user?.save();
+
+    res.status(201).json({
+        success: true,
+        message: "Successfully"
+    });
+   } catch (error) {
+    console.log(error);
+    res.status(500).json({
+        message: "auth error",
+        success: false,
+        error: error 
+    });
 }
+
+
+};
+
+export const suggestedFriend = async (req: Request, res: Response, next: NextFunction) => {
+    
+    try {
+        const { userId } = req.body.user;
+
+        let queryObject : any = {};
+
+        queryObject._id = { $ne: userId};
+
+        queryObject.friends = { $nin: userId};
+
+        let queryResult = Users.find(queryObject)
+            .limit(10)
+            .select("firstName lastName profilrUrl profession -password");
+
+        const suggestedFriends = await queryResult;
+
+        res.status(200).json({
+            success: true,
+            data: suggestedFriends
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "auth error",
+            success: false,
+            error: error 
+        });
+    }
+    
+};
