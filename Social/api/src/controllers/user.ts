@@ -5,8 +5,10 @@ import { compare, hash } from "bcrypt";
 import { CustomError } from "../types";
 import PasswordReset from "../db/models/PasswordReset";
 import { resetPasswordLink } from "./help";
+import { sign } from "jsonwebtoken";
 
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173/";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verifyEmail = async (req: Request, res: Response) => {
     const { userId, token } = req.params;
@@ -157,6 +159,87 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
             res.status(404).json({ message: error });
       }
 
+}
+
+export const getUser = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        // from middleware
+        const { userId } = req.body.user;
+        const { id } = req.params;
+
+        const user = await Users.findById(id ?? userId).populate({
+            path: "friends",
+            select: "-password"
+        });
+
+        if (!user) {
+            res.status(200).json({
+                message: "User Not Found",
+                success: false,
+            });
+            return; 
+        }
+
+        user.password = "";
+
+        res.status(200).json({
+            success: true,
+            user: user
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "auth error",
+            success: false,
+            error: error 
+        })
+    }
+}
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { firstName, lastName, location, contact, profession } = req.body;
+
+        if (!(firstName || lastName || location || profession || contact)) {
+            const error = new CustomError ("Please provide the required fields");
+            next(error);
+            return;
+        }
+
+        const userId = req.body.user;
+
+        const updateUser = {
+            firstName, lastName, location, contact, profession, _id : userId
+        };
+
+        const user = await Users.findByIdAndUpdate( userId, updateUser, { 
+            new: true
+        })
+
+        if (!user) {
+            next(new CustomError("User not found", 404));
+            return; 
+        }
+
+        await user?.populate({path: "friends", select: "-password"});
+        const token = sign(user?._id, JWT_SECRET as string);
+
+        user.password = "";
+
+        res.status(200).json({
+            sucess: true,
+            message: "User updated successfully",
+            user,
+            token,
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error});
+    }
 }
 
 

@@ -20,7 +20,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     
     if (!parsedData.success) {
         console.log(parsedData.error);
-        const error = new Error("Please provide vaild inputs") as CustomError;
+        const error = new CustomError("Please provide vaild inputs");
         error.statusCode = 400;
         next(error);
         return;
@@ -33,7 +33,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         })
         
         if (!user) {
-            const error = new Error("Invalid email or password") as CustomError;
+            const error = new CustomError("Invalid email or password");
             error.statusCode = 400;
             next(error);
             return;
@@ -43,9 +43,9 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         const isMatch = await compare(password, user.password);
 
         if (!isMatch) {
-            const error = new Error("Invalid email or password") as CustomError;
+            const error = new CustomError("Invalid email or password");
             error.statusCode = 400;
-            console.log(isMatch)
+            //console.log(isMatch)
             next(error);
             return;
         };
@@ -53,7 +53,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         user.password = "";
 
         if (!user.verified) {
-            const error = new Error("User email is not verified. Check your email account and verify your email") as CustomError;
+            const error = new CustomError("User email is not verified. Check your email account and verify your email");
             error.statusCode = 401;
             next( error );
             return;
@@ -86,7 +86,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const parsedData = registerSchema.safeParse(req.body);
     // zod validation
     if (!parsedData.success) {
-        const error = new Error("Invalid Inputs") as CustomError;
+        const error = new CustomError("Invalid Inputs");
         error.statusCode = 400;
         next(error)
         return;
@@ -95,7 +95,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     try {
         const userExist = await Users.findOne({email});
         if (userExist) {
-            const error = new Error("Email Address already exists") as CustomError;
+            const error = new CustomError("Email Address already exists");
             error.statusCode = 400;
             next(error)
             return;
@@ -111,7 +111,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         })
 
         if (!user) {
-            const error = new Error("Failed to create User / DB issue") as CustomError;
+            const error = new CustomError("Failed to create User / DB issue");
             error.statusCode = 500;
             console.log(error.message);
             next(error);

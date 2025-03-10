@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
+import { CustomError } from "../types";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -13,14 +14,18 @@ export const authMiddleware = (req : Request, res: Response, next: NextFunction)
     }
 
     if (!payload || !payload.startsWith("Bearer")) {
-        next("Authentication== failed");
+        const error = new CustomError ("Authentication== failed");
+        error.statusCode = 401;
+        next(error);
         return;
     }
 
     const token = payload?.split(" ")[1];
 
     if (!token) {
-        next("Authentication== failed");
+        const error = new CustomError ("Authentication== failed");
+        error.statusCode = 401;
+        next(error);
         return;
     }
 
