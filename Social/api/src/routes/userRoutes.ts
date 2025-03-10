@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changePassword, getUser, requestPasswordReset, resetPassword, updateUser, verifyEmail } from "../controllers/user";
+import { changePassword, friendRequest, getUser, requestPasswordReset, resetPassword, updateUser, verifyEmail } from "../controllers/user";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 
@@ -18,3 +18,9 @@ userRouter.post("/reset-password", changePassword);
 userRouter.post("/get-user/:id?",authMiddleware, getUser)
 userRouter.put("/update-user", authMiddleware, updateUser )
 
+// friend request
+userRouter.post("/friend-request", authMiddleware, friendRequest);
+userRouter.post("/get-friend-request", authMiddleware, );
+
+// accept / deny friend request
+userRouter.post("/accept-request", authMiddleware, ); 

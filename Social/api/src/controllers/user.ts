@@ -6,6 +6,7 @@ import { CustomError } from "../types";
 import PasswordReset from "../db/models/PasswordReset";
 import { resetPasswordLink } from "./help";
 import { sign } from "jsonwebtoken";
+import FriendRequest from "../db/models/friendRequest";
 
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173/";
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -193,7 +194,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
         res.status(500).json({
             message: "auth error",
             success: false,
-            error: error 
+            error: error
         })
     }
 }
@@ -208,7 +209,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const userId = req.body.user;
+        const { userId } = req.body.user;
 
         const updateUser = {
             firstName, lastName, location, contact, profession, _id : userId
@@ -242,5 +243,80 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     }
 }
 
+export const friendRequest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.body.user;
 
+        const { requestTo } = req.body;
 
+        const requestExist = await FriendRequest.findOne({
+            requestFrom: userId,
+            requestTo,
+        });
+
+        if (requestExist) {
+            const error = new CustomError("Friend Request alredy sent");
+            next(error);
+            return;
+        }
+
+        const accountExist = await FriendRequest.findOne({
+            requestFrom: requestTo,
+            requestTo: userId
+        });
+
+        if (accountExist) {
+            const error = new CustomError("Friend Request alredy sent");
+            next(error);
+            return;
+        }
+
+        const newRequest = await FriendRequest.create({
+            requestFrom: userId,
+            requestTo,
+        });
+
+        if (!newRequest) {
+            const error = new CustomError("Failed to send request");
+            next(error);
+            return;
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "auth error",
+            success: false,
+            error: error 
+        })
+    }
+}
+
+export const getFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.body.user;
+
+        const request = await FriendRequest.find({
+            requestTo: userId,
+            requestStatus: "Pending"
+        }).populate({
+            path: "requestFrom",
+            select: "firstName lastName profileUrl profession -password",
+        }).limit(10).sort({
+            _id: -1
+        })
+
+        res.status(200).json({
+            success: true,
+            data: request
+        })
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "auth error",
+            success: false,
+            error: error 
+        });
+    }
+}
