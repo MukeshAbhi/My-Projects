@@ -1,11 +1,12 @@
 import { Router } from "express";
 import {authRouter }from "./authRoutes";
 import { userRouter } from "./userRoutes";
+import { postRouter } from "./postRoutes";
 
 
-export const mainRouter = Router();
+export const router = Router();
 
-mainRouter.use(`/auth`, authRouter); //auth/register
-mainRouter.use(`/users`, userRouter);
-// router.use(`/posts`, postRoute);
+router.use(`/auth`, authRouter); //auth/register
+router.use(`/users`, userRouter);
+router.use(`/post`,postRouter);
 
