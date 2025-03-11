@@ -65,6 +65,12 @@ export const getPosts = async (req: Request, res: Response, next: NextFunction) 
             })
             .sort({ _id: -1})/* Sort newest first */
             .limit(10);
+
+        if (!posts) {
+            const error = new CustomError("Failed to fetch Post")
+            next(error);
+            return;
+        }
         
         const friendsPosts = posts.filter((post) => {
             const str = post.userId?._id.toString();
@@ -94,5 +100,61 @@ export const getPosts = async (req: Request, res: Response, next: NextFunction) 
     } catch (error) {
         console.log(error);
         res.status(404).json({ message: error});
+    }
+}
+
+export const getPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const { id } = req.params;
+        const post = await Post.findById(id).populate({
+            path: "userId",
+            select: "firstName lastName location profileUrl"
+        });
+
+        if (!post) {
+            const error = new CustomError("Failed to fetch Post")
+            next(error);
+            return;
+        }
+
+        res.status(200).json({
+            sucess: true,
+            message: "successful",
+            data: post,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({message: error})
+    }
+}
+
+export const getUserPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const post = await Post.find({ userId: id })
+            .populate({
+                path: "userId",
+                select: "firstName lastName profileUrl location "
+            })
+            .sort({
+                _id: -1
+            });
+
+        if (!post) {
+            const error = new CustomError("Failed to fetch Post")
+            next(error);
+            return;
+        };
+
+        res.status(200).json({
+            sucess: true,
+            message: "successfully",
+            data: post,
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error });
     }
 }
