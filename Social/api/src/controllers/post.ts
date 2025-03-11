@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../types";
 import Post from "../db/models/postModel";
 import Users from "../db/models/userModel";
+import Comments from "../db/models/commentModel";
 
 export const createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -38,7 +39,7 @@ export const createPost = async (req: Request, res: Response, next: NextFunction
         res.status(404).json({message: error})
     }
 
-}
+};
 
 export const getPosts = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -101,7 +102,7 @@ export const getPosts = async (req: Request, res: Response, next: NextFunction) 
         console.log(error);
         res.status(404).json({ message: error});
     }
-}
+};
 
 export const getPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -127,7 +128,7 @@ export const getPost = async (req: Request, res: Response, next: NextFunction) =
         console.log(error);
         res.status(404).json({message: error})
     }
-}
+};
 
 export const getUserPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -156,5 +157,59 @@ export const getUserPost = async (req: Request, res: Response, next: NextFunctio
     } catch (error) {
         console.log(error);
         res.status(404).json({ message: error });
+    }
+};
+
+export const getComments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { postId } = req.params;
+        
+        const postComments = await Comments.find({ postId })
+            .populate({
+                path: "userId",
+                select: "firstName lastName profileUrl location "
+            })
+            .populate({
+                path: "replies.userId",
+                select: "firstName lastName profileUrl location "
+            })
+            .sort({ _id : -1});
+
+        if (!postComments) {
+            const error = new CustomError("Failed to fetch Comments");
+            next(error);
+            return;
+        };        
+
+        res.status(200).json({
+            sucess: true,
+            message: "successful",
+            data: postComments,
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error})
+        
+    }
+};
+
+export const likePost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.body.user;
+        const { id } = req.params;
+
+        const post = await Post.findById( id );
+
+        const isPresent = post?.likes.includes(String(userId));
+
+        if (!isPresent) {
+            post?.likes.push(userId);
+        } else {
+            post?.likes = post?.likes.filter((pId) => pId !== String(userId) )
+        }
+    } catch(error) {
+        console.log(error);
+        res.status(404).json({ message: error})
     }
 }

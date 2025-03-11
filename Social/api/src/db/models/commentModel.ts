@@ -8,7 +8,7 @@ const commentSchema = new mongoose.Schema(
     from: { type: String, required: true },
     replies: [
       {
-        rid: { type: mongoose.Schema.Types.ObjectId },
+        rId: { type: mongoose.Schema.Types.ObjectId },
         userId: { type: Schema.Types.ObjectId, ref: "Users" },
         from: { type: String },
         replyAt: { type: String },
