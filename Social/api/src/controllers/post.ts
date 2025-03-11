@@ -201,15 +201,107 @@ export const likePost = async (req: Request, res: Response, next: NextFunction) 
 
         const post = await Post.findById( id );
 
+        if (!post) {
+            const error = new CustomError("Failed to fetch Post")
+            next(error);
+            return;
+        }
+
+        // use Transcations here
         const isPresent = post?.likes.includes(String(userId));
 
         if (!isPresent) {
             post?.likes.push(userId);
         } else {
-            post?.likes = post?.likes.filter((pId) => pId !== String(userId) )
+            post.likes = post?.likes.filter((pId) => pId !== String(userId));
         }
+
+        const newPost = await Post.findByIdAndUpdate(id, post, {
+            new: true /* Ensures that the updated post is returned instead of the old version  */
+        })
+
+        res.status(200).json({
+            sucess: true,
+            message: "successful",
+            data: newPost,
+        });
     } catch(error) {
         console.log(error);
         res.status(404).json({ message: error})
+    }
+};
+
+export const likrPostComment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.body.user;
+        const { id, rId } = req.params;
+
+        try {
+            if (rId === null || rId === undefined || rId === "false" ) {
+                const comment = await Comments.findById(id);
+
+                if (!comment) {
+                    const error = new CustomError("Failed to fetch Comment");
+                    next(error);
+                    return;
+                }
+
+                const isMatch = comment?.likes.includes(String(userId));
+
+                if (!isMatch) {
+                    comment?.likes.push(userId);
+                } else {
+                    comment.likes = comment?.likes.filter((i) => i !== String(userId));
+                }
+
+                const updatedComment = await Comments.findByIdAndUpdate(id, comment, {
+                    new: true,
+                })
+
+                res.status(201).json(updatedComment);
+            } else {
+                const replyComments = await Comments.findOne(
+                    { _id: id},
+                    {
+                        replies : {
+                            $elemMatch: {
+                                _id: rId
+                            },
+                        },
+                    },
+                );
+
+                if (!replyComments) {
+                    const error = new CustomError("Failed to fetch Comment");
+                    next(error);
+                    return;
+                }
+
+                const isMatch = replyComments?.replies[0].likes.includes(String(userId));
+
+                if (!isMatch) {
+                    replyComments?.replies[0].likes.push(userId);
+                } else {
+                    replyComments.replies[0].likes = replyComments?.replies[0].likes.filter((i) => i !== String(userId));
+                };
+
+                const selectQuery = { _id: id, "replies._id": rId };
+
+                const updateQuery = {
+                    $set: {
+                        "replies.$.likes" : replyComments.replies[0].likes,
+                    }
+                }
+                const updatedComment = await Comments.updateOne(selectQuery, updateQuery, { new : true} )
+
+                res.status(201).json(updatedComment);
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(404).json({ message: error});
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error});
     }
 }
