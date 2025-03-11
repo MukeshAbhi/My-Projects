@@ -304,4 +304,99 @@ export const likrPostComment = async (req: Request, res: Response, next: NextFun
         console.log(error);
         res.status(404).json({ message: error});
     }
+};
+
+export const commentPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { comment, from } = req.body;
+        const { userId } = req.body.user;
+        const { id } = req.params;
+
+        if (comment === null ) {
+            const error = new CustomError("Comment is required");
+            error.code = 404;
+            next(error);
+            return;
+        }
+
+        const newComment = await Comments.create({ comment, from, userId, postId: id})
+
+        //populating posts with comments
+        const post = await Post.findById(id);
+
+        if (!post) {
+            const error = new CustomError("Failed to featch post");
+            error.code = 404;
+            next(error);
+            return;
+        }
+
+        post?.comments.push(newComment._id);
+
+        const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+
+        res.status(201).json(newComment);
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error});
+    }
+}
+
+export const replyPostComment = async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.body.user;
+    const { comment, replyAt, from } = req.body;
+    const { id } = req.params;
+
+    if (comment === null ) {
+        const error = new CustomError("Comment is required");
+        error.code = 404;
+        next(error);
+        return;
+    }
+
+    try {
+        const commentInfo = await Comments.findById(id);
+
+        commentInfo?.replies.push({
+            comment,
+            replyAt,
+            from,
+            userId,
+            created_At: Date.now(),
+        });
+
+        commentInfo?.save();
+
+        res.status(200).json(commentInfo);
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error });
+    }
+};
+
+export const deletePost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.body.user;
+        const { id } = req.params;
+
+        const post = await Post.findById(id);
+
+        if (post?.userId === userId) {
+            await Post.findByIdAndDelete(id); 
+        } else {
+            const error = new CustomError("Failed to delete Post");
+            error.code = 404;
+            next(error);
+            return;
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Deleted successfully",
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ message: error });
+    }
 }
