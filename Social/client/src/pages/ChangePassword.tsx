@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { CustomButton } from "../components/CustomButton";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { log } from "console";
+
 
 export const ChangePassword = () => {
 
