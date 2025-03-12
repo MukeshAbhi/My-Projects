@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SetterOrUpdater } from 'recoil';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,10 +16,10 @@ interface ApiRequestParams {
 }
 
 interface FetchPosts {
-    url: string;
+    uri: string;
     token?: string;
     data?: any;
-    dispatch?: React.Dispatch<any>
+    setPosts: SetterOrUpdater<any>;
 }
 
 export const apiRequest = async ({ url, token, data, method }: ApiRequestParams) => {
@@ -55,6 +56,99 @@ export const handleFileUpload = async (uploadFile: File | Blob) => {
     }
 };
 
-export const fetchPosts: FetchPosts = async (url, token, data, deispatch)  => {
+export const fetchPosts = async ({uri, token, data,setPosts}: FetchPosts ) => {
 
-}
+    try {
+            const res = await apiRequest({
+                url: uri || "/posts",
+                token,
+                method: "POST",
+                data: data || {}
+            });
+            setPosts(res.data);
+            return;
+
+    } catch(error) {
+        console.log(error);
+        return;
+    }
+
+};
+
+export const likePost = async ( uri:string, token:string ) => {
+    try {
+        const res = await apiRequest({
+            url: uri,
+            token,
+            method: "POST"
+        });
+        return res.data;
+    } catch(error) {
+        console.log(error);
+    }
+};
+
+export const deletePost = async ( id:string, token:string ) => {
+    try {
+        const res = await apiRequest({
+            url: `/post/${id}`,
+            token,
+            method: "DELETE"
+        });
+        return res.data;
+    } catch(error) {
+        console.log(error);
+    }
+};
+
+export const getUserInfo = async (token:string, id:string) => {
+    try {
+        const uri = id === undefined ? "/users/get-user" : `/users/get-user/${id}`;
+
+        const res = await apiRequest({
+            url: uri,
+            token,
+            method: "POST"
+        });
+
+        if (res.data.message === "Authentication failed") {
+            localStorage.removeItem("user")
+            alert("User session expried. Login again.");
+            window.location.replace("/login");
+        }
+
+        return res.data.user;
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+export const sendFrienRequest = async (token:string, id:string) => {
+    try {
+        const res = await apiRequest({
+            url: "/users/friend-request",
+            token,
+            method: "POST",
+            data: { requestTo: id}
+        })
+
+        return res.data;
+    } catch(error) {
+        console.log(error);
+    }
+};
+
+export const viewUserProfileHas =  async (token:string, id:string) => {
+    try {
+        const res = await apiRequest({
+            url: "/users/profile-view",
+            token,
+            method: "POST",
+            data: { id }
+        })
+
+        return res.data;
+    } catch(error) {
+        console.log(error);
+    }
+};
