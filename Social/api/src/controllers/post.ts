@@ -381,7 +381,16 @@ export const deletePost = async (req: Request, res: Response, next: NextFunction
 
         const post = await Post.findById(id);
 
-        if (post?.userId === userId) {
+        if (!post) {
+            const error = new CustomError("Failed to fetch Post")
+            next(error);
+            return;
+        }
+
+        console.log("userId " , userId);
+        console.log("post.userId.id  ",post?.userId?._id );
+        
+        if (String(post?.userId?._id) === String(userId)) {
             await Post.findByIdAndDelete(id); 
         } else {
             const error = new CustomError("Failed to delete Post");

@@ -4,7 +4,7 @@ import morgan from "morgan";
 import 'dotenv/config';
 import dbConnection from "./db";
 import errorMiddleware from "./middleware/errorMiddleware";
-import { mainRouter } from "./routes";
+import { router } from "./routes";
 
 const app = express();
 
@@ -23,7 +23,7 @@ app.use(express.json({ limit: "10mb"}));
 app.use(express.urlencoded({ extended: true }))
 app.use(morgan("dev"));
 
-app.use("/api/v1",mainRouter);
+app.use("/api/v1",router);
 
 //error middleware
 app.use(errorMiddleware)

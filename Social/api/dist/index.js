@@ -22,7 +22,7 @@ app.use((0, cors_1.default)({
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, morgan_1.default)("dev"));
-app.use("/api/v1", routes_1.mainRouter);
+app.use("/api/v1", routes_1.router);
 //error middleware
 app.use(errorMiddleware_1.default);
 app.listen(port, () => {

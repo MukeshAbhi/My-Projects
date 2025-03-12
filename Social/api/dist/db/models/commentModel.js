@@ -41,7 +41,7 @@ const commentSchema = new mongoose_1.default.Schema({
     from: { type: String, required: true },
     replies: [
         {
-            rid: { type: mongoose_1.default.Schema.Types.ObjectId },
+            rId: { type: mongoose_1.default.Schema.Types.ObjectId },
             userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Users" },
             from: { type: String },
             replyAt: { type: String },

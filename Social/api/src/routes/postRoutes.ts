@@ -16,10 +16,16 @@ postRouter.post("/get-user-post/:id", authMiddleware, getUserPost);
 // get comments
 postRouter.get("/comments/:postId", authMiddleware, getComments);
 
-// like and comment on Post
+// like Post
 postRouter.post("/like/:id", authMiddleware, likePost)
+
+// like post's comments
 postRouter.post("/like-comment/:id/:rId?", authMiddleware, likrPostComment);
+
+// comment on a post
 postRouter.post("/comment/:id", authMiddleware, commentPost);
+
+//replay to comments
 postRouter.post("/replay-comment/:id", authMiddleware, replyPostComment);
 
 //delete post

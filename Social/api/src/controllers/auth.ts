@@ -29,7 +29,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const user = await Users.findOne({ email }).select("+password").populate({
             path: "friends",
-            select: "firstName lastName location profileUrl -password "
+            select: "firstName lastName location profileUrl "
         })
         
         if (!user) {
