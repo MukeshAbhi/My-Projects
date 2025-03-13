@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { data, Link } from "react-router-dom";
 import { TextInput } from "../components/TextInput";
 import { useForm } from "react-hook-form"; 
 import { useState } from "react";
 import { CustomButton } from "../components/CustomButton";
 import { Loading } from "../components/Loading";
 import { ErrMsg } from "../types";
+import { apiRequest } from "../utils";
+import { useAuth } from "../customHooks/useAuth";
 
 export const Login = () => {
 
@@ -16,9 +18,43 @@ export const Login = () => {
                                                 status: ""
                                             });
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const { user, login, logout } = useAuth();
+    
 
-    const onSubmit = () => {
-        alert("form submited")
+    const onSubmit = async ( data: any ) => {
+        setIsSubmitting(true);
+
+        try {
+            const res = await apiRequest({
+                url:'auth/login',
+                data: data,
+                method: "POST"
+            });
+
+            if (!res) {
+                setErrMsg({message:"Something went wrong. Please try again.",
+                    status:"failed"
+                });
+                setIsSubmitting(false);
+                return;
+            }
+
+            if ( res.status === "failed") {
+                setErrMsg(res);
+            } else {
+                setErrMsg(res);
+                const newData = { token: res.token, ...res.user };
+                login(newData);
+                setTimeout(() => {
+                    window.location.replace("/");
+                }, 5000);
+            }
+
+
+        } catch (error) {
+            console.log(error);
+            setIsSubmitting(false);
+        }
     }
 
     return (

@@ -20,13 +20,11 @@ const Layout = () => {
   console.log(user);
   const location = useLocation();
 
-  return <Outlet />
-
-  // return user?.token ? (
-  //   <Outlet />
-  // ) : (
-  //   <Navigate to={'/login'} state={{from : location}} replace />
-  // )
+  return user?.token ? (
+    <Outlet />
+  ) : (
+    <Navigate to={'/login'} state={{from : location}} replace />
+  )
 }
 
 function App() {

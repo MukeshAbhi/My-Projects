@@ -66,7 +66,18 @@ export interface User {
     _id: string;
   }
 
-  export interface ErrMsg {
+export interface ErrMsg {
     message: string;
     status: string
 }
+
+export interface RegisterFormData {
+  FirstName: string;
+  LastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+
+

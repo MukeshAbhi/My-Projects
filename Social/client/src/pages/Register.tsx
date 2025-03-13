@@ -4,6 +4,9 @@ import { CustomButton } from "../components/CustomButton"
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ErrMsg } from "../types";
+import { apiRequest } from "../utils";
+import { Loading } from "../components/Loading";
+
 
 export const Register = () => {
     
@@ -16,8 +19,46 @@ export const Register = () => {
                                         });
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     
-    const onSubmit = () => {
-        alert("form submited")
+    const onSubmitHandler = async (data: any) => {
+       setIsSubmitting(true);
+
+       const { confirmPassword, FirstName, LastName, ...restData } = data;
+
+       const formattedData = {
+        firstName: FirstName, 
+        lastName: LastName, 
+        ...restData
+    };
+
+       try {
+            const res = await apiRequest({
+                url: "auth/register",
+                data: formattedData,
+                method: "POST"
+            });
+            
+
+            if (!res) {
+                setErrMsg({message:"Something went wrong. Please try again.",
+                    status:"failed"
+                });
+                return;
+            }
+            
+            
+            if ( res.status === "failed") {
+                setErrMsg(res);
+            } else {
+                setErrMsg(res);
+                setTimeout(() => {
+                    window.location.replace("/login");
+                }, 5000);
+            }
+            setIsSubmitting(false);
+       } catch(error) {
+        console.log(error);
+        setIsSubmitting(false);
+       }
     }
 
     return(
@@ -51,16 +92,16 @@ export const Register = () => {
                     </p>
 
                     <form className="py-8 flex flex-col gap-5"
-                        onSubmit={handleSubmit(onSubmit)}
+                        onSubmit={handleSubmit(onSubmitHandler)}
                     >
                         <div className="w-full flex gap-2">
                             <TextInput 
-                                name="FirstName"
+                                name="firstName"
                                 placeholder="John"
                                 type="text"
                                 label="First Name"
                                 register={
-                                    register("FirstName", {
+                                    register("firstName", {
                                         required: "First Name required"
                                     })
                                 }
@@ -69,12 +110,12 @@ export const Register = () => {
                                 error= {errors.FirstName ? String(errors.FirstName.message) : ""}
                             />
                             <TextInput 
-                                name="LastName"
+                                name="lastName"
                                 placeholder="Doh"
                                 type="text"
                                 label="Last Name"
                                 register={
-                                    register("LastName", {
+                                    register("lastName", {
                                         required: "Last Name required"
                                     })
                                 }
@@ -146,11 +187,15 @@ export const Register = () => {
                                 </span>
                         )}
 
-                        <CustomButton 
+                        {
+                            !isSubmitting ? (
+                                <CustomButton 
                             title="Create Account" 
-                            type="button" 
+                            type="submit" 
                             containerStyles={`inline flex justify-center rounded-md bg-blue px-8 py-3 text-sm font-medium text-white outline-none `}
                         />
+                            ) : <Loading/>
+                        } 
                     </form>
                     <p  className="text-ascent-2 text-sm text-center">
                         Allready have an account?

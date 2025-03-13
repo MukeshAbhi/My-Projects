@@ -7,12 +7,13 @@ import { TextInput } from "./TextInput";
 import { CustomButton } from "./CustomButton";
 import { Bell, Moon, Sun } from 'lucide-react';
 import { themeSelector } from "../store/selectors/themeSelector";
-import { logoutSelector } from "../store/selectors/userSelector";
+import { useAuth } from "../customHooks/useAuth";
+
 
 export const TopBar = () => {
     const theme = useRecoilValue(themeAtom);
     const setTheme = useSetRecoilState(themeSelector);
-    const logout = useSetRecoilState(logoutSelector);
+    const { user, login, logout } = useAuth();
     const [object, setObject] = useRecoilState(userAtom);
 
     const {register, handleSubmit, formState: {errors}} = useForm();
@@ -66,7 +67,7 @@ export const TopBar = () => {
             </div>
             <div>
                 <CustomButton 
-                    onClick={() => logout(object.user) }
+                    onClick={() => logout() }
                     title="Log Out"
                     containerStyles={`text-sm text-ascent-1 px-2 md:px-6 py-1 md:py-2 border border-[#666] rounded-full`}
                 />

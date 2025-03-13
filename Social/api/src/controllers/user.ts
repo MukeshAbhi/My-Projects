@@ -123,7 +123,7 @@ export const resetPassword = async (req: Request, res: Response) => {
                 res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
                 return;
             } else {
-                res.redirect(`${CLIENT_URL}users/change-password?type=reset&id=${userId}`);
+                res.redirect(`${CLIENT_URL}users/change-password?&id=${userId}`);
             }
         }
     } catch (err) {

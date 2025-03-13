@@ -3,11 +3,6 @@ import { SetterOrUpdater } from 'recoil';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const API = axios.create({
-    baseURL: API_URL,
-    responseType: "json",
-});
-
 interface ApiRequestParams {
     url: string;
     token?: string;
@@ -22,7 +17,15 @@ interface FetchPosts {
     setPosts: SetterOrUpdater<any>;
 }
 
+export const API = axios.create({
+    baseURL: API_URL,
+    responseType: "json",
+});
+
+
 export const apiRequest = async ({ url, token, data, method }: ApiRequestParams) => {
+    console.log("API Call → URL:", API_URL + url);
+    console.log("Request Data:", data);
     try {
         const result = await API(url, {
             method : method || "GET",
