@@ -14,8 +14,9 @@ import { ErrMsg, User } from "../types";
 import { Loading } from "../components/Loading";
 import { PostCard } from "../components/PostCard";
 import { EditProfile } from "../components/EditProfile";
-import { apiRequest, deletePost, fetchPosts, handleFileUpload, likePost } from "../utils";
+import { apiRequest, deletePost, fetchPosts, getUserInfo, handleFileUpload, likePost, sendFrienRequest } from "../utils";
 import { postAtom } from "../store/atoms/postAtom";
+import { useAuth } from "../customHooks/useAuth";
 
 interface FriendRequest {
     _id: string;
@@ -43,6 +44,7 @@ export const Home = () => {
     const [ posting, setPosting ] = useState<boolean>(false);
     const [ loading, setLoading ] = useState<boolean>(false);
     const [ posts, setPosts ] = useRecoilState(postAtom);
+    const { login } = useAuth();
 
 
     const handlePostSubmit = async (data: any) => {
@@ -98,7 +100,8 @@ export const Home = () => {
         await deletePost(id, user?.token as string);
         await fetchPost();
     };
-
+    console.log("posts.length ", posts.length);
+    
     const fetchFriendRequest = async () => {
         try {
             const res = await apiRequest({
@@ -106,6 +109,7 @@ export const Home = () => {
                 token: user?.token,
                 method: "POST"
             });
+            console.log("fromhere ", res.data);
             setFriendRequest(res.data);
         } catch(error) {
             console.log(error);
@@ -119,28 +123,54 @@ export const Home = () => {
                 token: user?.token,
                 method: "POST"
             });
+            console.log("fromhere 2 ", res.data);
             setSuggestedFriends(res.data);
         } catch(error) {
             console.log(error);
         }
     };
 
-    const handleFriendRequest = async (data: any) => {
-        
+    const handleFriendRequest = async (id: string) => {
+        try{
+            
+            const res = await sendFrienRequest( user?.token as string, id );
+            console.log("res ", res);
+            await fetchSuggestedFriends();
+        } catch(error) {
+            console.log(error)
+        }
     };
 
-    const acceptFriendRequest = async (data: any) => {
-        
+    const acceptFriendRequest = async (id: string, status: string) => {
+        try {
+    
+            const res = await apiRequest({
+                url: "users/accept-request",
+                token: user?.token as string,
+                method: "POST",
+                data: { rId: id, status}
+            });
+            console.log(res);
+           await fetchFriendRequest();
+           console.log("Here")
+           await fetchSuggestedFriends();
+           console.log("Here here")
+        } catch(error) {
+            console.log(error);
+        }
     };
 
-    const getUser = async () => {
+    // const getUser = async () => {
         
-    };
+    //     const res = await getUserInfo(user?.token as string);
+    //     const newData = { token: user?.token, ...res };
+    //     login(newData);
+    // };
 
     useEffect( () => {
 
         setLoading(true);
-        getUser();
+        //getUser();
         fetchPost();
         fetchFriendRequest();
         fetchSuggestedFriends(); 
@@ -271,8 +301,9 @@ export const Home = () => {
                     </form>
 
                     {loading ? (<Loading />) : posts.length > 0 ? (
-                        posts.map((post) => (
-                            <PostCard key={post._id} post={post}
+                        posts.filter(post => post).map((post,index) => (
+                            
+                            <PostCard key={post._id || `fallback-key-${index}`} post={post}
                                       user={user}
                                       deletePost={handleDelete}
                                       likePost={handlePostLike}
@@ -322,12 +353,14 @@ export const Home = () => {
 
                                         <div className="flex gap-1">
                                             <CustomButton
-                                                title="Add"
+                                                title="Accept"
                                                 containerStyles="bg-[#0444a4] text-xs text-white px-2 py-1 hover:bg-blue rounded-full"
+                                                onClick={()=>acceptFriendRequest(_id, "Accepted")}
                                             />
                                             <CustomButton
                                                 title="Deny"
                                                 containerStyles="border border-[#666] hover:bg-[#666] text-xs text-ascent-1 px-1.5 py-1 rounded-full"
+                                                onClick={()=>acceptFriendRequest(_id, "Denied")}
                                             />
                                         </div>  
                                     </div>
@@ -367,8 +400,9 @@ export const Home = () => {
                                                 </span>
                                             </div>
                                         </Link>
-                                        <button className="bg-[#0444a430] text-sm text-white p-1 rounded " onClick={() => {}}>
+                                        <button className="bg-[#0444a430] text-sm text-white p-1 rounded " onClick={() => handleFriendRequest(friend._id)}>
                                             <UserRoundPlus size={20} className="text-[#0f52b6]" />
+
                                         </button>
                                     </div>
                                 ) )

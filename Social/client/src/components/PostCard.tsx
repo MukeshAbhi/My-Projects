@@ -11,7 +11,7 @@ import { CustomButton } from "./CustomButton";
 import { postComments } from "../assets/data";
 
 interface PostCardProps {
-    post: Post;
+    post: Post ,
     user?: User | null;
     deletePost : (id: string) => void;
     likePost : (uri : string) => void;

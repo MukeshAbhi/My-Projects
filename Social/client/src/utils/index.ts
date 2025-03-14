@@ -108,7 +108,7 @@ export const deletePost = async ( id:string, token:string ) => {
     }
 };
 
-export const getUserInfo = async (token:string, id:string) => {
+export const getUserInfo = async (token:string, id?:string) => {
     try {
         const uri = id === undefined ? "/users/get-user" : `/users/get-user/${id}`;
 

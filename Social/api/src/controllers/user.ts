@@ -248,7 +248,7 @@ export const sendFriendRequest = async (req: Request, res: Response, next: NextF
     try {
         const { userId } = req.body.user;
         const { requestTo } = req.body;
-
+    
         const requestExist = await FriendRequest.findOne({
             requestFrom: userId,
             requestTo,
@@ -334,7 +334,7 @@ export const handleRequest = async (req: Request, res: Response, next: NextFunct
         const { userId } = req.body.user;
 
         const { rId, status } = req.body;
-
+      
         const requestExist = await FriendRequest.findById(rId);
 
         if (!requestExist) {
