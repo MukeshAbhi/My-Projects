@@ -1,9 +1,9 @@
-import { useRecoilValue } from "recoil"
+import { useRecoilState, useRecoilValue } from "recoil"
 import { userAtom } from "../store/atoms/userAtom"
 import { TopBar } from "../components/TopBar";
 import { ProfileCard } from "../components/ProfileCard";
 import { FriendsCard } from "../components/FriendsCard";
-import { posts, requests, suggest } from "../assets/data";
+import { requests, suggest } from "../assets/data";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
@@ -15,27 +15,102 @@ import { ErrMsg } from "../types";
 import { Loading } from "../components/Loading";
 import { PostCard } from "../components/PostCard";
 import { EditProfile } from "../components/EditProfile";
+import { apiRequest, fetchPosts, handleFileUpload } from "../utils";
+import { postAtom } from "../store/atoms/postAtom";
 
 export const Home = () => {
     
     const user = useRecoilValue(userAtom).user;
     const edit = useRecoilValue(userAtom).edit;
-    const [friendRequest, setFriendRequest] = useState(requests);
-    const [suggestedFriends, setSuggestedFriends] = useState(suggest);
-    const {register, handleSubmit, formState:{ errors }} = useForm();
-    const [errMsg, setErrMsg] = useState<ErrMsg>({
+    const [ friendRequest, setFriendRequest ] = useState(requests);
+    const [ suggestedFriends, setSuggestedFriends ] = useState(suggest);
+    const  {register, handleSubmit, formState:{ errors }, reset } = useForm();
+    const [ errMsg, setErrMsg ] = useState<ErrMsg>({
         message: "",
         status: ""
     });
-    const [file, setFile] = useState<File | null>(null);
-    const [posting, setPosting] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [ file, setFile ] = useState<File | null>(null);
+    const [ posting, setPosting ] = useState<boolean>(false);
+    const [ loading, setLoading ] = useState<boolean>(false);
+    const [ posts, setPosts ] = useRecoilState(postAtom);
 
-    const handleSubmitii = () => {
-        alert("Form submited")
-    }
+    const handlePostSubmit = async (data: any) => {
+        setPosting(true);
+        setErrMsg({message: "",
+            status: ""});
 
-    
+        try {
+            const uri = file && (await handleFileUpload(file));
+            
+            const newData = uri ? { ...data, image: uri} : data;
+
+            const res = await apiRequest({
+                url: "post/create-post",
+                data: newData,
+                token: user?.token,
+                method: "POST"
+            });
+
+            if (res.status === "failed") {
+                setErrMsg(res);
+            } else {
+                reset({
+                    description: ""
+                });
+                setFile(null);
+                setErrMsg({message: "",
+                    status: ""});
+                await fetchPost();
+            }
+            setPosting(false);
+        } catch(error) {
+            console.log(error);
+            setPosting(false);
+        }
+    };
+
+    const fetchPost = async () => {
+        await fetchPosts({
+            token: user?.token ? user.token : "",
+            setPosts: setPosts,
+        })
+    };
+
+    const handlePostLike  = async (data: any) => {
+        
+    };
+
+    const deletePost = async (data: any) => {
+        
+    };
+
+    const fetchFriendRequest = async () => {
+        
+    };
+
+    const fetchSuggestedFriends = async () => {
+        
+    };
+
+    const handleFriendRequest = async (data: any) => {
+        
+    };
+
+    const acceptFriendRequest = async (data: any) => {
+        
+    };
+
+    const getUser = async () => {
+        
+    };
+
+    useEffect( () => {
+        setLoading(true);
+        getUser();
+        fetchPost();
+        fetchFriendRequest();
+        fetchSuggestedFriends(); 
+    }, [])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0]; // Use optional chaining
@@ -67,7 +142,7 @@ export const Home = () => {
                      {/* Description Input Box */}
                     <form 
                         className="bg-primary px-4 rounded-lg"
-                        onSubmit={handleSubmit(handleSubmitii)}
+                        onSubmit={handleSubmit(handlePostSubmit)}
                     >
                         <div className="w-full flex items-center gap-2 py-4 border-b border-[#66666645]">
                             <img 
@@ -161,7 +236,7 @@ export const Home = () => {
 
                     </form>
 
-                    {loading ? (<Loading />) : posts.length > 0 ? (
+                    {posting ? (<Loading />) : posts.length > 0 ? (
                         posts.map((post) => (
                             <PostCard key={post._id} post={post}
                                       user={user}

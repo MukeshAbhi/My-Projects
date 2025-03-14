@@ -1,5 +1,6 @@
 import { useRecoilState } from "recoil"
 import { userAtom } from "../store/atoms/userAtom"
+import { User } from "../types";
 
 
 
@@ -16,5 +17,9 @@ export const useAuth = () => {
         localStorage.removeItem("user");
     }
 
-    return { user: profile.user, login, logout};
+    const updateUser = (data: User) => {
+        setProfile({ ...profile, user: data})
+    }
+
+    return { user: profile.user, login, logout, updateUser };
 } 

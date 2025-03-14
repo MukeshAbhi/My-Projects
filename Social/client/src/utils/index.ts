@@ -2,6 +2,7 @@ import axios from 'axios';
 import { SetterOrUpdater } from 'recoil';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const CLOUDINARY = import.meta.env.VITE_CLOUDINARY_ID;
 
 interface ApiRequestParams {
     url: string;
@@ -11,8 +12,8 @@ interface ApiRequestParams {
 }
 
 interface FetchPosts {
-    uri: string;
-    token?: string;
+    uri?: string;
+    token: string;
     data?: any;
     setPosts: SetterOrUpdater<any>;
 }
@@ -49,9 +50,12 @@ export const handleFileUpload = async (uploadFile: File | Blob) => {
     formData.append("upload_preset", "socialmedia");
 
     try {
+        console.log("CLOUDINARY ", CLOUDINARY)
         const response = await axios.post(
-            `https://api/cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_ID}/image/upload`,formData
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`, 
+            formData
         );
+        console.log("uri  ", response.data)
         return response.data.secure_url;
     } catch (error) {
         console.error("API request error:", error);
@@ -59,11 +63,11 @@ export const handleFileUpload = async (uploadFile: File | Blob) => {
     }
 };
 
-export const fetchPosts = async ({uri, token, data,setPosts}: FetchPosts ) => {
+export const fetchPosts = async ({uri, token, data, setPosts}: FetchPosts ) => {
 
     try {
             const res = await apiRequest({
-                url: uri || "/posts",
+                url: uri || "post",
                 token,
                 method: "POST",
                 data: data || {}
