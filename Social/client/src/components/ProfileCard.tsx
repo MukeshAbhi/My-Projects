@@ -15,7 +15,7 @@ type ProfileCardProps = {
 export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
 
     const [object, setObject] = useRecoilState(userAtom);
-    const proflileOwner = useRecoilValue(userAtom).user;
+    const proflileOwner = object.user;
     
     const clickHandler = () => {
         setObject((currentValue) => ({

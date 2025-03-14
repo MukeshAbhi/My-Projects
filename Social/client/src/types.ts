@@ -62,7 +62,7 @@ export interface User {
     comment: string;
     created_At: string;
     updated_At: string;
-    likes:[];
+    likes:string[];
     _id: string;
   }
 

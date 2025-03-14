@@ -170,10 +170,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
         console.log("here  ",userId)
         const { id } = req.params;
 
-        const user = await Users.findById(id ?? userId).populate({
-            path: "friends",
-            select: "-password"
-        });
+        const user = await Users.findById(id ?? userId).populate("friends");
 
         if (!user) {
             res.status(200).json({

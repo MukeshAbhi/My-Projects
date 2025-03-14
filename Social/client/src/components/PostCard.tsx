@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { ErrMsg, Post,  PostComments,  User } from "../types"
+import { ErrMsg, Post,  PostComments,  Replay,  User } from "../types"
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
 import moment from "moment";
@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { Loading } from "./Loading";
 import { CustomButton } from "./CustomButton";
-import { postComments } from "../assets/data";
+import { apiRequest } from "../utils";
 
 interface PostCardProps {
     post: Post ,
@@ -20,10 +20,61 @@ interface PostCardProps {
 interface CommentFormProps {
     user?: User | null;
     id: string;
-    replayAt: string;
+    replyAt: string;
     getComments: (event: string) => void;
 }
-const CommentForm :FC<CommentFormProps>= ({user, id, replayAt, getComments}) => {
+
+interface ReplayCardProps {
+    reply: Replay;
+    user: User;
+    handleLike :() => void;
+}
+
+const ReplyCard :FC<ReplayCardProps>= ({ reply, user, handleLike }) => {
+    return (
+      <div className='w-full py-3'>
+        <div className='flex gap-3 items-center mb-1'>
+          <Link to={"/profile/" + reply.userId._id}>
+            <img
+              src={reply.userId.profileUrl ?? NoProfile}
+              alt={reply.userId.firstName}
+              className='w-10 h-10 rounded-full object-cover'
+            />
+          </Link>
+  
+          <div>
+            <Link to={"/profile/" + reply?.userId?._id}>
+              <p className='font-medium text-base text-ascent-1'>
+                {reply.userId.firstName} {reply.userId.lastName}
+              </p>
+            </Link>
+            <span className='text-ascent-2 text-sm'>
+              {moment(reply.created_At).fromNow()}
+            </span>
+          </div>
+        </div>
+  
+        <div className='ml-12'>
+          <p className='text-ascent-2 '>{reply?.comment}</p>
+          <div className='mt-2 flex gap-6'>
+            <p
+              className='flex gap-2 items-center text-base text-ascent-2 cursor-pointer'
+              onClick={handleLike}
+            >
+              {reply.likes.includes(user._id) ? (
+                <ThumbsUp size={20} className="text-blue" />
+              ) : (
+                <ThumbsUp size={20}  />
+              )}
+              {reply.likes.length} Likes
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+const CommentForm :FC<CommentFormProps>= ({user, id, replyAt, getComments}) => {
     const [loading, setLoading] = useState(false);
     const [errMsg, setErrMsg] = useState<ErrMsg>({
         status: "",
@@ -33,8 +84,45 @@ const CommentForm :FC<CommentFormProps>= ({user, id, replayAt, getComments}) => 
         mode: "onChange"
     });
 
-    const onSubmit = () => {
-        alert("done")
+    const onSubmit = async(data: any) => {
+        setLoading(true);
+        setErrMsg({
+            status: "",
+            message: ""
+        });
+        try {
+            const URL = !replyAt? "post/comment/" + id : "post/reply-comment/" + id ;
+
+            const newData = {
+                comment: data.comment,
+                from: user?.firstName + " " + user?.lastName,
+                replyAt: replyAt
+            };
+
+            const res = await apiRequest({
+                url: URL,
+                data: newData,
+                token: user?.token,
+                method: "POST"
+            });
+
+            if (res.status === "failed") {
+                setErrMsg(res);
+            } else {
+                reset({
+                    comment: "",
+                });
+                setErrMsg({
+                    status: "",
+                    message: ""
+                });
+                getComments(id)
+            }
+            setLoading(false)
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+        }
     }
 
     return(
@@ -52,7 +140,7 @@ const CommentForm :FC<CommentFormProps>= ({user, id, replayAt, getComments}) => 
                 <TextInput 
                     name="comment"
                     styles="w-full rounded-full py-3"
-                    placeholder={replayAt ? `Replay @${replayAt}` : "Comment this post"}
+                    placeholder={replyAt ? `Replay @${replyAt}` : "Comment this post"}
                     register={register("comment", {
                         required:"Comment can not be empty"
                     })}
@@ -91,15 +179,30 @@ const CommentForm :FC<CommentFormProps>= ({user, id, replayAt, getComments}) => 
 export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost }) => {
 
     const [showAll, setShowAll] = useState("");
-    const [showReplay, setShowReplay] = useState("");
+    const [showReply, setShowReply] = useState("");
     const [comments, setComments] = useState<PostComments[]>([]);
     const [loading, setLoading] = useState(false);
-    const [replayComments, setReplayComments] = useState("");
+    const [replyComments, setReplyComments] = useState("");
     const [showComments, setShowComments] = useState<string | null>('') ;
 
+    const getPostComments = async (id: string) => {
+        try{
+            const res = await apiRequest({
+                url: "post/comments/" + id,
+                method: "GET",
+                token: user?.token
+            })
+            console.log("Dandanadan ", res.data)
+            return res.data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const getComments  = async (id : string) => {
-        setReplayComments("");
-        setComments(postComments as PostComments[]);
+        setReplyComments("");
+        const result = await getPostComments(id);
+        setComments(result);
         setLoading(false)
     }
 
@@ -210,10 +313,10 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                     <CommentForm
                             user={user}
                             id={post._id}
-                            getComments={() => getComments(post._id)} replayAt={""}                     
+                            getComments={() => getComments(post._id)} replyAt={""}                     
                     />
                     {loading ? (<Loading />) : 
-                        comments.length > 0 ? (
+                       comments && comments.length > 0 ? (
                             comments.map((comment) => (
                                 <div className="w-full py-2" key={comment._id}> 
                                     <div className="flex gap-3 items-center mb-1">
@@ -243,8 +346,11 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                                         </p>
                                         {/*Like, replay */}
                                         <div className="mt-2 flex gap-6">
-                                            <p className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer">
-                                                {" "}
+                                            <p className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer"
+                                                onClick={() => {
+                                                    handleLike("/post/like-comment/"+comment._id)
+                                                }}
+                                            >
                                                 {comment.likes?.includes(user?._id as string) ? (
                                                     <ThumbsUp size={20} color="blue" />
                                                 ) : (
@@ -252,8 +358,49 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                                                 )}
                                                 {comment.likes?.length} {comment.likes?.length && comment.likes?.length > 1 ? "Likes" : "Like"}
                                             </p>
-                                           
+                                            <span
+                                                className='text-blue cursor-pointer'
+                                                onClick={() => setReplyComments(comment?._id)}
+                                            >
+                                                 Reply
+                                            </span>
                                         </div>
+                                        {replyComments === comment?._id && (
+                                            <CommentForm
+                                                user={user}
+                                                id={comment?._id}
+                                                replyAt={comment?.from as string }
+                                                getComments={() => getComments(post?._id)}
+                                            />
+                                        )}
+                                    </div>
+
+                                   {/* REPLIES */}
+                                    <div className='py-2 px-8 mt-6'>
+                                        {comment?.replies?.length > 0 && (
+                                            <p
+                                                className='text-base text-ascent-1 cursor-pointer'
+                                                onClick={() =>
+                                                    setShowReply(
+                                                        showReply === comment?._id ? "" : comment?._id
+                                                    )
+                                                }
+                                            >
+                                                Show Replies ({comment?.replies?.length})
+                                            </p>
+                                        )}
+
+                                        {showReply === comment?._id &&
+                                            comment?.replies?.map((reply) => (
+                                                <ReplyCard
+                                                    reply={reply}
+                                                    user={user as User}
+                                                    key={reply._id}
+                                                    handleLike={() =>
+                                                        handleLike(`/post/like-comment/${comment?._id}/${reply._id}`)
+                                                    }
+                                                />
+                                            ))}
                                     </div>
                                 </div>
                             ))

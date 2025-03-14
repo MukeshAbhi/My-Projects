@@ -8,7 +8,6 @@ interface FriendsProps {
 
 export const FriendsCard :React.FC<FriendsProps> = ({ friends }) => {
   
-    console.log(friends?.length)
     return(
         <div className="bg-primary shadow-sm rounded-lg px-6 py-5">
             <div className="flex items-center justify-between text-ascent-1 pd-2 border-b border-[#66666645]">

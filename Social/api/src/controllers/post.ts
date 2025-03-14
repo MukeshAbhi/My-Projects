@@ -162,9 +162,9 @@ export const getUserPost = async (req: Request, res: Response, next: NextFunctio
 
 export const getComments = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { postId } = req.params;
+        const { id } = req.params;
         
-        const postComments = await Comments.find({ postId })
+        const postComments = await Comments.find({ postId:id })
             .populate({
                 path: "userId",
                 select: "firstName lastName profileUrl location "
@@ -174,7 +174,8 @@ export const getComments = async (req: Request, res: Response, next: NextFunctio
                 select: "firstName lastName profileUrl location "
             })
             .sort({ _id : -1});
-
+           
+            
         if (!postComments) {
             const error = new CustomError("Failed to fetch Comments");
             next(error);
@@ -257,7 +258,7 @@ export const likrPostComment = async (req: Request, res: Response, next: NextFun
                 const updatedComment = await Comments.findByIdAndUpdate(id, comment, {
                     new: true,
                 })
-
+                console.log(updatedComment)
                 res.status(201).json(updatedComment);
             } else {
                 const replyComments = await Comments.findOne(
@@ -311,30 +312,30 @@ export const commentPost = async (req: Request, res: Response, next: NextFunctio
         const { comment, from } = req.body;
         const { userId } = req.body.user;
         const { id } = req.params;
-
+        
         if (comment === null ) {
             const error = new CustomError("Comment is required");
             error.code = 404;
             next(error);
             return;
         }
-
+    
         const newComment = await Comments.create({ comment, from, userId, postId: id})
-
+       
         //populating posts with comments
         const post = await Post.findById(id);
-
+       
         if (!post) {
             const error = new CustomError("Failed to featch post");
             error.code = 404;
             next(error);
             return;
         }
-
+       
         post?.comments.push(newComment._id);
-
+       
         const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
-
+        
         res.status(201).json(newComment);
     } catch (error) {
         console.log(error);

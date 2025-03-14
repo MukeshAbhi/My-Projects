@@ -14,7 +14,7 @@ postRouter.post("/:id", authMiddleware, getPost);
 postRouter.post("/get-user-post/:id", authMiddleware, getUserPost);
 
 // get comments
-postRouter.get("/comments/:postId", authMiddleware, getComments);
+postRouter.get("/comments/:id", authMiddleware, getComments);
 
 // like Post
 postRouter.post("/like/:id", authMiddleware, likePost)
@@ -26,7 +26,7 @@ postRouter.post("/like-comment/:id/:rId?", authMiddleware, likrPostComment);
 postRouter.post("/comment/:id", authMiddleware, commentPost);
 
 //replay to comments
-postRouter.post("/replay-comment/:id", authMiddleware, replyPostComment);
+postRouter.post("/reply-comment/:id", authMiddleware, replyPostComment);
 
 //delete post
 postRouter.delete("/:id", authMiddleware, deletePost);

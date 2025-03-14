@@ -100,7 +100,6 @@ export const Home = () => {
         await deletePost(id, user?.token as string);
         await fetchPost();
     };
-    console.log("posts.length ", posts.length);
     
     const fetchFriendRequest = async () => {
         try {
@@ -109,7 +108,7 @@ export const Home = () => {
                 token: user?.token,
                 method: "POST"
             });
-            console.log("fromhere ", res.data);
+            
             setFriendRequest(res.data);
         } catch(error) {
             console.log(error);
@@ -123,7 +122,6 @@ export const Home = () => {
                 token: user?.token,
                 method: "POST"
             });
-            console.log("fromhere 2 ", res.data);
             setSuggestedFriends(res.data);
         } catch(error) {
             console.log(error);
@@ -134,7 +132,6 @@ export const Home = () => {
         try{
             
             const res = await sendFrienRequest( user?.token as string, id );
-            console.log("res ", res);
             await fetchSuggestedFriends();
         } catch(error) {
             console.log(error)
@@ -150,27 +147,29 @@ export const Home = () => {
                 method: "POST",
                 data: { rId: id, status}
             });
-            console.log(res);
+           
            await fetchFriendRequest();
-           console.log("Here")
+           
            await fetchSuggestedFriends();
-           console.log("Here here")
+           
         } catch(error) {
             console.log(error);
         }
     };
 
-    // const getUser = async () => {
+    const getUser = async () => {
         
-    //     const res = await getUserInfo(user?.token as string);
-    //     const newData = { token: user?.token, ...res };
-    //     login(newData);
-    // };
+        const res = await getUserInfo(user?.token as string);
+        console.log("res ", res)
+        const newData = { token: user?.token, ...res };
+        console.log("newData, " , newData);
+        login(newData);
+    };
 
     useEffect( () => {
 
         setLoading(true);
-        //getUser();
+        getUser();
         fetchPost();
         fetchFriendRequest();
         fetchSuggestedFriends(); 
