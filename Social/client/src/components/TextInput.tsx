@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import { FieldError, FieldErrorsImpl, Merge, UseFormRegisterReturn } from "react-hook-form";
 
 interface TextInputProps {
     type?: string;
@@ -9,7 +9,7 @@ interface TextInputProps {
     labelStyles?: string;
     register?: UseFormRegisterReturn;
     name: string;
-    error?: string | FieldError | undefined;
+    error?: string | FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined;
   }
 
 

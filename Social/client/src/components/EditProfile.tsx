@@ -6,29 +6,69 @@ import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { Loading } from "./Loading";
 import { CustomButton } from "./CustomButton";
+import { apiRequest, handleFileUpload } from "../utils";
 import { TextInput } from "./TextInput";
+import { useAuth } from "../customHooks/useAuth";
 
 export const EditProfile = () => {
-    const [user, setUser] = useRecoilState(userAtom);
-    const edit = user.edit;
+    const [profile, setProfile] = useRecoilState(userAtom);
     const [errMsg, setErrMsg] = useState<ErrMsg>({
         message: "",
         status: ""
     });
-    const [isSubmitting, SetIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [picture, setPicture] = useState <File | null>(null);
 
-    const { register, handleSubmit, formState: { errors }} = useForm({mode: "onChange", defaultValues: {...user.user}})
+    const { login, updateUser } = useAuth();
+
+    const { register, handleSubmit, formState: { errors }} = useForm({mode: "onChange", defaultValues: {...profile.user}})
     
-    const onSubmit = ()=> {
-        
+    const onSubmit = async (data: any)=> {
+        setIsSubmitting(true);
+        setErrMsg({
+            message:"",
+            status:"",
+        });
+
+        try {
+            const uri = picture && (await handleFileUpload(picture));
+
+            const { firstName, lastName, location, profession } = data;
+
+            const res = await apiRequest({
+                url: "users/update-user",
+                data: {
+                    firstName,
+                    lastName,
+                    location,
+                    profession,
+                    profileUrl: uri ? uri : profile.user?.profileUrl
+                },
+                method: "PUT",
+                token: profile.user?.token
+            });
+
+            if (res.status === "failed") {
+                setErrMsg(res);
+            } else {
+                setErrMsg(res);
+                const newUser = { token: res.token, ...res.user };
+                login(newUser);
+
+                setTimeout(()=> {
+                    updateUser(false);
+                }, 3000);
+            }
+            setIsSubmitting(false);
+
+        } catch(error) {
+            console.log(error);
+            setIsSubmitting(false)
+        }
     };
+
     const handleClose = () => {
-        console.log("before : " , edit);
-        setUser((currentValue => ({
-        ...currentValue, edit: false
-        })))
-        console.log("after : " , edit);
+        updateUser(false);
     }
 
     const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

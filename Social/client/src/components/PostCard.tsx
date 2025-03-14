@@ -13,8 +13,8 @@ import { postComments } from "../assets/data";
 interface PostCardProps {
     post: Post;
     user?: User | null;
-    deletePost : (event: string) => void;
-    likePost : (event: React.MouseEvent<HTMLButtonElement>) => void;
+    deletePost : (id: string) => void;
+    likePost : (uri : string) => void;
 }
 
 interface CommentFormProps {
@@ -103,9 +103,15 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
         setLoading(false)
     }
 
-    const handleLike = async () => {
-        
+    const handleLike = async (uri : string) => {
+        likePost(uri);
+        await getComments(post._id);
     }
+
+    const handleDelete = async (id : string) => {
+        deletePost(id)
+        
+    } 
     return(
         <div className="mb-2 bg-primary p-4 rounded-xl">
             <div className="flex gap-3 items-center mb-2">
@@ -168,8 +174,9 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                 <div className="mt-4 flex justify-between items-center px-3 py-2 text-ascent-2 text-base border-t border-[#66666645]">
                     <p
                         className="flex gap-2 items-center text-base cursor-pointer"
+                        onClick={() => handleLike("post/like/" + post._id)}
                     >
-                        {post.likes?.includes(user?._id) ? (
+                        {post.likes?.includes(user?._id as string) ? (
                             <ThumbsUp size={20} className="text-blue" />
                         ) : (
                             <ThumbsUp size={20} />
@@ -190,7 +197,7 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
 
                     {user?._id === post.userId._id && 
                         <div className="flex items-center gap-1 cursor-pointer text-base text-ascent-2"
-                             onClick={() => deletePost(post._id)}
+                             onClick={() =>handleDelete(post._id)}
                         >
                             <Trash2 size={20}/>
                             <span>Delete</span>
@@ -238,7 +245,7 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                                         <div className="mt-2 flex gap-6">
                                             <p className="flex gap-2 items-center text-base text-ascent-2 cursor-pointer">
                                                 {" "}
-                                                {comment.likes?.includes(user?._id) ? (
+                                                {comment.likes?.includes(user?._id as string) ? (
                                                     <ThumbsUp size={20} color="blue" />
                                                 ) : (
                                                     <ThumbsUp size={20} />

@@ -3,7 +3,6 @@ import { userAtom } from "../store/atoms/userAtom"
 import { TopBar } from "../components/TopBar";
 import { ProfileCard } from "../components/ProfileCard";
 import { FriendsCard } from "../components/FriendsCard";
-import { requests, suggest } from "../assets/data";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NoProfile } from "../assets";
@@ -11,19 +10,30 @@ import { CustomButton } from "../components/CustomButton";
 import { FileVideo, ImagePlay, ImagePlus, UserRoundPlus } from "lucide-react";
 import { TextInput } from "../components/TextInput";
 import { useForm } from "react-hook-form";
-import { ErrMsg } from "../types";
+import { ErrMsg, User } from "../types";
 import { Loading } from "../components/Loading";
 import { PostCard } from "../components/PostCard";
 import { EditProfile } from "../components/EditProfile";
-import { apiRequest, fetchPosts, handleFileUpload } from "../utils";
+import { apiRequest, deletePost, fetchPosts, handleFileUpload, likePost } from "../utils";
 import { postAtom } from "../store/atoms/postAtom";
+
+interface FriendRequest {
+    _id: string;
+    requestFrom: {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        profileUrl: string;
+        profession: string;
+    };
+}
 
 export const Home = () => {
     
     const user = useRecoilValue(userAtom).user;
     const edit = useRecoilValue(userAtom).edit;
-    const [ friendRequest, setFriendRequest ] = useState(requests);
-    const [ suggestedFriends, setSuggestedFriends ] = useState(suggest);
+    const [ friendRequest, setFriendRequest ] = useState<FriendRequest[]>([]);
+    const [ suggestedFriends, setSuggestedFriends ] = useState<User[]>([]);
     const  {register, handleSubmit, formState:{ errors }, reset } = useForm();
     const [ errMsg, setErrMsg ] = useState<ErrMsg>({
         message: "",
@@ -33,6 +43,7 @@ export const Home = () => {
     const [ posting, setPosting ] = useState<boolean>(false);
     const [ loading, setLoading ] = useState<boolean>(false);
     const [ posts, setPosts ] = useRecoilState(postAtom);
+
 
     const handlePostSubmit = async (data: any) => {
         setPosting(true);
@@ -74,22 +85,44 @@ export const Home = () => {
             token: user?.token ? user.token : "",
             setPosts: setPosts,
         })
+        setLoading(false);
     };
 
-    const handlePostLike  = async (data: any) => {
-        
+    const handlePostLike  = async (uri: any) => {
+        await likePost(uri, user?.token ?? "" );
+
+        await fetchPost();
     };
 
-    const deletePost = async (data: any) => {
-        
+    const handleDelete = async (id: string) => {
+        await deletePost(id, user?.token as string);
+        await fetchPost();
     };
 
     const fetchFriendRequest = async () => {
-        
+        try {
+            const res = await apiRequest({
+                url: "users/get-friend-request",
+                token: user?.token,
+                method: "POST"
+            });
+            setFriendRequest(res.data);
+        } catch(error) {
+            console.log(error);
+        }
     };
 
     const fetchSuggestedFriends = async () => {
-        
+        try {
+            const res = await apiRequest({
+                url: "users/suggested-friends",
+                token: user?.token,
+                method: "POST"
+            });
+            setSuggestedFriends(res.data);
+        } catch(error) {
+            console.log(error);
+        }
     };
 
     const handleFriendRequest = async (data: any) => {
@@ -105,6 +138,7 @@ export const Home = () => {
     };
 
     useEffect( () => {
+
         setLoading(true);
         getUser();
         fetchPost();
@@ -236,12 +270,12 @@ export const Home = () => {
 
                     </form>
 
-                    {posting ? (<Loading />) : posts.length > 0 ? (
+                    {loading ? (<Loading />) : posts.length > 0 ? (
                         posts.map((post) => (
                             <PostCard key={post._id} post={post}
                                       user={user}
-                                      deletePost={()=>{}}
-                                      likePost={()=>{}}
+                                      deletePost={handleDelete}
+                                      likePost={handlePostLike}
                             />
                         ))
                     ) : (

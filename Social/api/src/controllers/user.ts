@@ -202,9 +202,9 @@ export const getUser = async (req: Request, res: Response, next: NextFunction) =
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { firstName, lastName, location, contact, profession } = req.body;
+        const { firstName, lastName, location, contact, profession, profileUrl } = req.body;
 
-        if (!(firstName || lastName || location || profession || contact)) {
+        if (!(firstName || lastName || location || profession || contact || profileUrl)) {
             const error = new CustomError ("Please provide the required fields");
             next(error);
             return;
@@ -213,7 +213,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
         const { userId } = req.body.user;
 
         const updateUser = {
-            firstName, lastName, location, contact, profession, _id : userId
+            firstName, lastName, location, contact, profession, profileUrl ,_id : userId
         };
 
         const user = await Users.findByIdAndUpdate( userId, updateUser, { 
@@ -428,10 +428,10 @@ export const suggestedFriend = async (req: Request, res: Response, next: NextFun
 
         let queryResult = Users.find(queryObject)
             .limit(10)
-            .select("firstName lastName profilrUrl profession -password");
+            .select("firstName lastName profileUrl profession");
 
         const suggestedFriends = await queryResult;
-
+       
         res.status(200).json({
             success: true,
             data: suggestedFriends
