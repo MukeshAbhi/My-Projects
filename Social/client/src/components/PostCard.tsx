@@ -222,7 +222,7 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                     <img 
                         src={post.userId.profileUrl ?? NoProfile}
                         alt={post.userId.firstName}
-                        className="w-14 h-14 object-cover rounded-full"
+                        className="w-12 h-12 md:w-14 md:h-14 object-cover rounded-full"
                     />
                 </Link>
                 <div className="w-full flex justify-between">
@@ -234,7 +234,7 @@ export const PostCard : FC<PostCardProps> = ({ post, user, deletePost, likePost 
                         </Link>
                         <span className="text-sm text-ascent-2">{post.userId.location}</span>
                     </div>
-                    <span className="text-ascent-2">
+                    <span className="hidden md:flex text-ascent-2">
                         {moment(post.createdAt ?? "2024-05-25").fromNow()}
                     </span>
                 </div>

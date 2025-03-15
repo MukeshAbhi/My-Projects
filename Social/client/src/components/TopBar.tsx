@@ -8,6 +8,8 @@ import { CustomButton } from "./CustomButton";
 import { Bell, Moon, Sun } from 'lucide-react';
 import { themeSelector } from "../store/selectors/themeSelector";
 import { useAuth } from "../customHooks/useAuth";
+import { fetchPosts } from "../utils";
+import { postAtom } from "../store/atoms/postAtom";
 
 
 export const TopBar = () => {
@@ -15,11 +17,16 @@ export const TopBar = () => {
     const setTheme = useSetRecoilState(themeSelector);
     const { user, login, logout } = useAuth();
     const [object, setObject] = useRecoilState(userAtom);
+    const setPosts = useSetRecoilState(postAtom);
 
     const {register, handleSubmit, formState: {errors}} = useForm();
 
-    const handleSearch = () => {
-        alert("document")
+    const handleSearch = async ( data: any) => {
+        await fetchPosts({
+            token: user?.token as string,
+            setPosts: setPosts,
+            data: data,
+        })
     };
 
     const clickHandler = () => {
@@ -43,6 +50,7 @@ export const TopBar = () => {
             <form
                 className="hidden md:flex items-center justify-center"
                 onSubmit={handleSubmit(handleSearch)}
+                onChange={handleSubmit(handleSearch)}
             >
                 <TextInput 
                     type="text"

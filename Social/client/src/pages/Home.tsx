@@ -91,7 +91,7 @@ export const Home = () => {
     };
 
     const handlePostLike  = async (uri: any) => {
-        await likePost(uri, user?.token ?? "" );
+        await likePost(uri, user?.token as string );
 
         await fetchPost();
     };

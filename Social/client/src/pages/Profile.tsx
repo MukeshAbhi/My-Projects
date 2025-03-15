@@ -1,24 +1,54 @@
 import { useParams } from "react-router-dom"
 import {  useRecoilValue } from "recoil";
 import { userAtom } from "../store/atoms/userAtom";
-import { useState } from "react";
-import { postAtom } from "../store/atoms/postAtom";
+import { useEffect, useState } from "react";
 import { TopBar } from "../components/TopBar";
 import { ProfileCard } from "../components/ProfileCard";
 import { FriendsCard } from "../components/FriendsCard";
-import { User } from "../types";
+import { Post, User } from "../types";
 import { PostCard } from "../components/PostCard";
 import { Loading } from "../components/Loading";
+import { deletePost, fetchPosts, getUserInfo, likePost } from "../utils";
+
 
 export const Profile = () => {
     const {id} = useParams();
     const user = useRecoilValue(userAtom).user;
     const [userInfo, setUserInfo] = useState<User | null>(user);
-    const posts  = useRecoilValue(postAtom);
+    //const posts  = useRecoilValue(postAtom);
     const [loading, setLoading] = useState(false);
+    const [ posts, setPosts ] = useState<Post[]>()
 
-    const handleDelete = () => {};
-    const handleLikePost = () => {};
+    const uri = `post/get-user-post/${id}`;
+    
+    const handleDelete = async (id: string) => {
+        await deletePost(id, user?.token as string);
+        await getPosts();
+    };
+    const handleLikePost = async (uri: string) => {
+        await likePost(uri, user?.token as string);
+        await getPosts();
+    };
+
+    const getUser = async () => {     
+        const res = await getUserInfo(user?.token as string,id);
+        console.log(res);
+        setUserInfo(res);
+    };
+
+    const getPosts = async () => {
+        await fetchPosts({
+            token: user?.token as string ,
+            setPosts: setPosts,
+            uri: uri
+        } )
+        setLoading(false);
+    }
+    useEffect(() => {
+        setLoading(true);
+        getUser();
+        getPosts();
+    }, [id])
      
     return (
         <>
@@ -37,7 +67,7 @@ export const Profile = () => {
                     <div className="flex-1 h-full bg-primary px-4 flex flex-col gap-6 overflow-y-auto">
                         {loading ? (
                             <Loading />
-                        ) : posts.length > 0 ? (
+                        ) :  posts !== undefined && posts.length > 0  ? (
                             posts.map((post) => (
                                 <PostCard 
                                     post={post}
