@@ -8,7 +8,6 @@ import { resetPasswordLink } from "./help";
 import { sign } from "jsonwebtoken";
 import FriendRequest from "../db/models/friendRequest";
 
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173/";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verifyEmail = async (req: Request, res: Response) => {
@@ -19,7 +18,11 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
         if (!result) {
             const message = "Invalid verification link. Try again later."
-            res.redirect(`${CLIENT_URL}users/verified?status=error&message=${message}`);
+            res.json({
+                status: "error",
+                message: message,
+                redirectUrl: `/users/verified?status=error&message=${message}`,
+            });
             return; 
         }
 
@@ -29,7 +32,11 @@ export const verifyEmail = async (req: Request, res: Response) => {
             await Verification.findOneAndDelete({ userId });
             await Users.findOneAndDelete({ _id: userId });
             const message = "Verification token has expired."
-            res.redirect(`${CLIENT_URL}users/verified?status=error&message=${message}`);
+            res.json({
+                status: "error",
+                message: message,
+                redirectUrl: `/users/verified?status=error&message=${message}`,
+            });
             return;
         }
 
@@ -37,17 +44,30 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
         if (!isMatch) {
             const message = "Invalid verification token."
-            res.redirect(`${CLIENT_URL}users/verified?status=error&message=${message}`);
+            res.json({
+                status: "error",
+                message: message,
+                redirectUrl: `/users/verified?status=error&message=${message}`,
+            });
             return;
         }
 
         await Users.findOneAndUpdate({ _id: userId }, { verified: true });
         await Verification.findOneAndDelete({ userId });
         const message = "Email verified successfully!"
-        res.redirect(`${CLIENT_URL}users/verified?status=success&message=${message}`);
+        res.json({
+            status: "success",
+            message: message,
+            redirectUrl: `/users/verified?status=success&message=${message}`,
+        });
+        
     } catch (err) {
         console.error(err);
-        res.redirect(`${CLIENT_URL}users/verified?status=error&message=`);
+        res.json({
+            status: "error",
+            message: "Something went wrong ",
+            redirectUrl: `/users/verified?status=error&message=`,
+        });
     }
 };
 
@@ -97,7 +117,11 @@ export const resetPassword = async (req: Request, res: Response) => {
 
         if (!user) {
             const message = "Invalid Link. Try again";
-            res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+            res.json({
+                status: "error",
+                message: message,
+                redirectUrl: `/users/reset-status?status=error&message=${message}`,
+            });
             return;
         }
 
@@ -105,7 +129,11 @@ export const resetPassword = async (req: Request, res: Response) => {
         
         if (!resetPassword) {
             const message = "Invalid Link. Try again";
-            res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+            res.json({
+                status: "error",
+                message: message,
+                redirectUrl: `/users/reset-status?status=error&message=${message}`,
+            });
             return;
         }
 
@@ -113,22 +141,36 @@ export const resetPassword = async (req: Request, res: Response) => {
 
         if (expiresAt && expiresAt.getTime() < Date.now()) {
             const message = "Link has expired. Please try again!"
-            res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+            res.json({
+                status: "error",
+                message: message,
+                redirectUrl: `/users/reset-status?status=error&message=${message}`,
+            });
             return;
         } else {
             const isMatch = compare(token, resetToken as string);
 
             if (!isMatch) {
                 const message = "Invalid Link. Try again";
-                res.redirect(`${CLIENT_URL}users/reset-status?status=error&message=${message}`);
+                res.json({
+                    status: "error",
+                    message: message,
+                    redirectUrl: `/users/reset-status?status=error&message=${message}`,
+                });
                 return;
             } else {
-                res.redirect(`${CLIENT_URL}users/change-password?&id=${userId}`);
+                res.json({
+                    redirectUrl: `/users/change-password?&id=${userId}`,
+                });
             }
         }
     } catch (err) {
         console.log(err)
-        res.redirect(`${CLIENT_URL}users/resetpassword?status=error&message=`);
+        res.json({
+            status: "error",
+            message: "Somethig went wrong",
+            redirectUrl: `/users/reset-status?status=error&message=`,
+        });
     }
 };
 
